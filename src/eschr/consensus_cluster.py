@@ -267,13 +267,13 @@ def run_base_clustering(args_in):
         # scale k range for selecting number of neighbors
         # based on size of subsampled data
         i = data.shape[0]
-        iter_k_range = args_in[0][0]
+        #iter_k_range = args_in[0][0]
         # set iter_k range floor based on asymptotic function of cell number, lower bound of 2
-        #k_floor = max(2, ((15 * i) / (1 * (i) + 3000)))
+        k_floor = max(2, ((16 * i) / (1 * (i) + 6000)))
         # set iter_k range ceiling based on dataset size
         # min ceiling is 5, otherwise based on asymptotic function of cell number
-        #k_ceil = max(5, (170 * i) / (1 * (i) + 3000))
-        #iter_k_range = (int(k_floor), int(k_ceil))
+        k_ceil = max(5, (160 * i) / (1 * (i) + 6000))
+        iter_k_range = (int(k_floor), int(k_ceil))
         
         # Get hyperparameter settings for this ensemble member
         iter_k, la_res, metric = get_hyperparameters(iter_k_range, args_in[0][1], args_in[0][2])
