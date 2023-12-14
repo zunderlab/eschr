@@ -1,5 +1,3 @@
-# _BETA VERSION - IN DEVELOPMENT_
-
 # ESCHR
 
 [![Documentation][badge-docs]][link-docs]
@@ -119,6 +117,8 @@ Now you can run code adapted from the example run scripts above or copy and past
 11. You should now be ready to run through the notebook!
 
 ## Release notes
+
+*Note: pre-release v0.1.0 was used for making figures in the submitted manuscript*
 
 See the [changelog][changelog].
 
