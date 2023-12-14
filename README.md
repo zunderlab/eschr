@@ -12,7 +12,7 @@ ESCHR: A hyperparameter-randomized ensemble approach for robust clustering acros
 
 ## Overview of Algorithm:
 
-![alt text](https://github.com/zunderlab/eschr/blob/d21660b444b68c18d0befa18ac50c02439b64c8d/docs/figure_1_schematic_v4.png)
+![alt text](./docs/figure_1_schematic_v4.png)
 
 ## Installation
 
