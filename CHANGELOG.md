@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning][].
 
 ## [Unreleased]
 
+- will be adding tests, logging, and improving documentation 
+
+## [v0.2.0]
+
+### Changed
+
+-   Updated ensemble clustering to include scaling the k hyperparameter range based on dataset size, yielding more consistent performance 
+
+## [v0.1.0]
+
 ### Added
 
--   Basic tool, preprocessing and plotting functions
+-   Basic tool and plotting functions used for preparing manuscript
