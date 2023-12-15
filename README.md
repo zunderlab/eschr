@@ -30,6 +30,8 @@ Python installed, we recommend installing [Mambaforge](https://github.com/conda-
 
 For full documentation, please refer to the [documentation][link-docs] for further details.
 
+To start, you can work through this [example notebook on colab](./docs/notebooks.paul15.ipynb)
+
 ### Most basic example run script:
 
 ```
