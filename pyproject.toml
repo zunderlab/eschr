@@ -23,7 +23,7 @@ dependencies = [
     "anndata==0.7.8",
     "igraph==0.10.4",
     "leidenalg",
-    "nmslib==2.1.1",
+    "nmslib==2.0.6",
     "numpy",
     "pandas==1.5.3",
     "zarr",
