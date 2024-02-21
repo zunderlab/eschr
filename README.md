@@ -14,7 +14,7 @@ ESCHR: A hyperparameter-randomized ensemble approach for robust clustering acros
 
 ## Installation
 
-You need to have Python 3.8 or newer installed on your system. If you don't have
+You need to have a Python version between 3.8 and 3.10 (inclusive) installed on your system. If you don't have
 Python installed, we recommend installing [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge).
 
 1. Make sure you have Anaconda installed and functional. [Conda FAQ](https://docs.anaconda.com/anaconda/user-guide/faq/) is a great resource for troubleshooting and verifying that everything is working properly.
