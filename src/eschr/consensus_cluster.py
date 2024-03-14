@@ -2,7 +2,6 @@
 import math
 import multiprocessing
 import random
-import resource
 import time
 import traceback
 import warnings
