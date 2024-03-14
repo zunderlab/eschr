@@ -30,7 +30,8 @@ Python installed, we recommend installing [Mambaforge](https://github.com/conda-
 
 For full documentation, please refer to the [documentation][link-docs] for further details.
 
-To start, you can work through this [example notebook on colab](./docs/notebooks/paul15.ipynb)
+To start, you can work through this [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb) 
+This allows you to try out the method without needing to install ESCHR locally.
 
 ### Most basic example run script:
 
