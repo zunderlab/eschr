@@ -10,5 +10,5 @@ api.md
 changelog.md
 references.md
 
-notebooks/example
+notebooks/paul15.ipynb
 ```
