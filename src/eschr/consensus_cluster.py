@@ -679,7 +679,7 @@ class ConsensusCluster:
         self.bipartite = bipartite
         self.hard_clusters = hard_clusters
         self.soft_membership_matrix = soft_membership_matrix
-        self.cell_conf_score = np.max(soft_membership_matrix, axis=1)
+        self.uncertainty_score = 1 - np.max(soft_membership_matrix, axis=1)
         time_per_iter = time.time() - start_time
         print("Full runtime: " + str(time_per_iter))
 
@@ -709,7 +709,7 @@ class ConsensusCluster:
             self.adata = data
             self.adata.obs["hard_clusters"] = self.hard_clusters
             self.adata.obsm["soft_membership_matrix"] = self.soft_membership_matrix
-            self.adata.obs["cell_conf_score"] = self.cell_conf_score
+            self.adata.obs["uncertainty_score"] = self.uncertainty_score
         elif isinstance(data, pd.DataFrame):
             self.adata = anndata.AnnData(X=data.to_sparse().to_coo().tocsr())
         elif isinstance(data, np.ndarray) or isinstance(data, coo_matrix):
@@ -734,7 +734,7 @@ class ConsensusCluster:
 
         self.adata.obs["hard_clusters"] = self.hard_clusters
         self.adata.obsm["soft_membership_matrix"] = self.soft_membership_matrix
-        self.adata.obs["cell_conf_score"] = self.cell_conf_score
+        self.adata.obs["uncertainty_score"] = self.uncertainty_score
 
         if return_adata:
             return self.adata
