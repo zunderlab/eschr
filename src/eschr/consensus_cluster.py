@@ -501,7 +501,7 @@ class ConsensusCluster:
         "multiresolution_clusters",
         "hard_clusters",
         "soft_membership_matrix",
-        "cell_conf_score",
+        "uncertainty_score",
         "adata",
     )
 
