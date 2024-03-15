@@ -167,6 +167,7 @@ def plot_umap(
                 frameon=False,
                 ncols=2,
                 palette=cat_palette,
+                cmap="viridis_r",
                 return_fig=True,
                 show=False,
                 **kwargs,
@@ -182,6 +183,6 @@ def plot_umap(
         except Exception as e:
             print(e)
     else:
-        _umap_utils.embedding(cc_obj.adata, color=features_to_plot, frameon=False, ncols=2, palette=cat_palette, **kwargs)
+        _umap_utils.embedding(cc_obj.adata, color=features_to_plot, frameon=False, ncols=2, palette=cat_palette, cmap="viridis_r", **kwargs)
         # palette=cluster_color_dict, edgecolor='none', size = 15, vmax=200)
         plt.show()
