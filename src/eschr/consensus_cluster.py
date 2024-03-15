@@ -401,16 +401,16 @@ def consensus_cluster_leiden(in_args):
         np.array([np.random.choice(np.where(row == row.max())[0]) for row in soft_membership_matrix])
     )
     # print("row sums: " + str(np.unique(final_smm.sum(axis=1))))
-    print(
-        "resolution: "
-        + str(i)
-        + "\n"
-        + "# soft clusters: "
-        + str(soft_membership_matrix.shape[1])
-        + "\n"
-        + "# hard clusters: "
-        + str(hard_clusters.unique().shape[0])
-    )
+    #print(
+    #    "resolution: "
+    #    + str(i)
+    #    + "\n"
+    #    + "# soft clusters: "
+    #    + str(soft_membership_matrix.shape[1])
+    #    + "\n"
+    #    + "# hard clusters: "
+    #    + str(hard_clusters.unique().shape[0])
+    #)
 
     return hard_clusters, csr_matrix(soft_membership_matrix), i  # , ari
 
