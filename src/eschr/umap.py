@@ -109,7 +109,7 @@ def run_umap(cc_obj, return_layout=False, n_neighbors=15, metric="euclidean", **
 
 
 def plot_umap(
-    cc_obj, features=None, cat_palette="tab20", cont_palette="viridis", show=True, output_path=None, **kwargs
+    cc_obj, features=None, cat_palette="tab20", cont_palette="viridis_r", show=True, output_path=None, **kwargs
 ):
     """
     Make UMAP plot colored by hard clusters and confidence scores.
@@ -153,26 +153,8 @@ def plot_umap(
         else:
             print("No umap found - running umap...")
             run_umap(cc_obj)
-    # For now plot_features is not available, needs troubleshooting
-    plot_features = False
-    if plot_features:
-        if features is None:
-            try:
-                features = ["hard_clusters", "cell_conf_score"]
-                features_to_plot = np.unique(cc_obj.adata.uns["rank_genes_groups"]["names"][0].tolist()).tolist()
-                features.extend(features_to_plot)
-            except Exception as e:
-                print(e)
-                print("Calculating hard cluster top marker genes for visualization")
-                # log2 transform, if it is not already! (can check this my looking at max value in array)
-                sc.tl.rank_genes_groups(cc_obj.adata, "hard_clusters", method="logreg")
-                features = ["hard_clusters", "cell_conf_score"]
-                features_to_plot = np.unique(cc_obj.adata.uns["rank_genes_groups"]["names"][0].tolist()).tolist()
-                features.extend(features_to_plot)
-        features_to_plot = ["hard_clusters", "cell_conf_score"]
-        features_to_plot.extend(features)
-    else:
-        features_to_plot = ["hard_clusters", "cell_conf_score"]
+    # For now specifying plot_features is not available, needs troubleshooting
+    features_to_plot = ["hard_clusters", "uncertainty_score"]
     ("Done umap, generating figures...")
     plt.rcParams['figure.figsize'] = [10, 8]
     if output_path is not None:
