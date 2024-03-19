@@ -12,6 +12,9 @@ ESCHR: A hyperparameter-randomized ensemble approach for robust clustering acros
 
 ![alt text](./docs/figure_1_schematic_v4.png)
 
+## Quick Start
+You can try out the method without needing to install ESCHR locally with this [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb) 
+
 ## Installation
 
 You need to have a Python version between 3.8 and 3.10 (inclusive) installed on your system. If you don't have
@@ -29,8 +32,6 @@ Python installed, we recommend installing [Mambaforge](https://github.com/conda-
 ## Getting started
 
 For full documentation, please refer to the [documentation][link-docs] for further details.
-
-To start, you can work through this [example notebook on colab](./docs/notebooks/paul15.ipynb)
 
 ### Most basic example run script:
 

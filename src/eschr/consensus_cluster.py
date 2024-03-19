@@ -2,7 +2,6 @@
 import math
 import multiprocessing
 import random
-import resource
 import time
 import traceback
 import warnings
@@ -402,16 +401,16 @@ def consensus_cluster_leiden(in_args):
         np.array([np.random.choice(np.where(row == row.max())[0]) for row in soft_membership_matrix])
     )
     # print("row sums: " + str(np.unique(final_smm.sum(axis=1))))
-    print(
-        "resolution: "
-        + str(i)
-        + "\n"
-        + "# soft clusters: "
-        + str(soft_membership_matrix.shape[1])
-        + "\n"
-        + "# hard clusters: "
-        + str(hard_clusters.unique().shape[0])
-    )
+    #print(
+    #    "resolution: "
+    #    + str(i)
+    #    + "\n"
+    #    + "# soft clusters: "
+    #    + str(soft_membership_matrix.shape[1])
+    #    + "\n"
+    #    + "# hard clusters: "
+    #    + str(hard_clusters.unique().shape[0])
+    #)
 
     return hard_clusters, csr_matrix(soft_membership_matrix), i  # , ari
 
@@ -502,7 +501,7 @@ class ConsensusCluster:
         "multiresolution_clusters",
         "hard_clusters",
         "soft_membership_matrix",
-        "cell_conf_score",
+        "uncertainty_score",
         "adata",
     )
 
@@ -680,7 +679,7 @@ class ConsensusCluster:
         self.bipartite = bipartite
         self.hard_clusters = hard_clusters
         self.soft_membership_matrix = soft_membership_matrix
-        self.cell_conf_score = np.max(soft_membership_matrix, axis=1)
+        self.uncertainty_score = 1 - np.max(soft_membership_matrix, axis=1)
         time_per_iter = time.time() - start_time
         print("Full runtime: " + str(time_per_iter))
 
@@ -710,7 +709,7 @@ class ConsensusCluster:
             self.adata = data
             self.adata.obs["hard_clusters"] = self.hard_clusters
             self.adata.obsm["soft_membership_matrix"] = self.soft_membership_matrix
-            self.adata.obs["cell_conf_score"] = self.cell_conf_score
+            self.adata.obs["uncertainty_score"] = self.uncertainty_score
         elif isinstance(data, pd.DataFrame):
             self.adata = anndata.AnnData(X=data.to_sparse().to_coo().tocsr())
         elif isinstance(data, np.ndarray) or isinstance(data, coo_matrix):
@@ -735,7 +734,7 @@ class ConsensusCluster:
 
         self.adata.obs["hard_clusters"] = self.hard_clusters
         self.adata.obsm["soft_membership_matrix"] = self.soft_membership_matrix
-        self.adata.obs["cell_conf_score"] = self.cell_conf_score
+        self.adata.obs["uncertainty_score"] = self.uncertainty_score
 
         if return_adata:
             return self.adata
