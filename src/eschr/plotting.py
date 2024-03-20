@@ -1,3 +1,4 @@
+import os
 import sys
 
 import matplotlib as mpl
@@ -9,48 +10,31 @@ import seaborn as sns
 from scipy.cluster import hierarchy
 from scipy.sparse import issparse
 from scipy.spatial.distance import pdist
+import umap
+
+from ._prune_features import calc_highly_variable_genes, calc_pca
+from . import _umap_utils
 
 mpl.use("Agg")  # this makes plt.show not work
 
 
 sys.setrecursionlimit(1000000)
 
+# flake8: noqa: RST210
+# flake8: noqa: RST203
 # flake8: noqa: F841
 # flake8: noqa: B902
 # flake8: noqa: E266
 
 
-def min_max_scaler(data_1d_vec, min_val=0, max_val=1):
-    """
-    Scale 1D vector between a min and max value.
-
-    Parameters
-    ----------
-    data_1d_vec : array-like
-        The 1D vector to scale.
-    min_val : int, default 0
-        Lower bound on range for scaling.
-    max_val : int, default 1
-        Lower bound on range for scaling.
-
-    Returns
-    -------
-    array-like
-        Data scaled to range specified by min_val and max_val.
-    """
-    x, y = min(data_1d_vec), max(data_1d_vec)
-    scaled_data_1d_vec = (data_1d_vec - x) / (y - x) * (max_val - min_val) + min_val
-    return scaled_data_1d_vec
-
-
-def make_smm_heatmap(cc_obj, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", show=True, output_path=None):
+def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", show=True, output_path=None):
     """
     Make a heatmap of soft cluster memberships.
 
     Parameters
     ----------
-    cc_obj : :class:`sharc.ConsensusCluster`
-        Filled object resulting from running SHaRC clustering.
+    adata : :class:`anndata.AnnData`
+        AnnData object containing results from running ESCHR clustering.
     features : list of str, default None
         Option to specify specific features to plot, if None then the method
         will calulate marker features for each cluster and plot those.
@@ -64,27 +48,27 @@ def make_smm_heatmap(cc_obj, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr
         Path specifying where to save the plot. If none, plot is not saved.
     """
     # Prep soft membership matrix data for plotting
-    hard_clust = np.unique(cc_obj.adata.obs["hard_clusters"])
-    cc_obj.adata.obsm["soft_membership_matrix"] = cc_obj.adata.obsm["soft_membership_matrix"][:, hard_clust]
+    hard_clust = np.unique(adata.obs["hard_clusters"])
+    adata.obsm["soft_membership_matrix"] = adata.obsm["soft_membership_matrix"][:, hard_clust]
     row_order = hierarchy.dendrogram(
-        hierarchy.linkage(pdist(cc_obj.adata.obsm["soft_membership_matrix"]), method="average"),
+        hierarchy.linkage(pdist(adata.obsm["soft_membership_matrix"]), method="average"),
         no_plot=True,
         color_threshold=-np.inf,
     )["leaves"]
     row_col_order_dict = slanted_orders(
-        cc_obj.adata.obsm["soft_membership_matrix"][row_order, :],
+        adata.obsm["soft_membership_matrix"][row_order, :],
         order_rows=False,
         order_cols=True,
         squared_order=True,
         discount_outliers=True,
     )
-    smm_reordered = cc_obj.adata.obsm["soft_membership_matrix"][row_order, :][row_col_order_dict["rows"].tolist(), :]
+    smm_reordered = adata.obsm["soft_membership_matrix"][row_order, :][row_col_order_dict["rows"].tolist(), :]
     smm_reordered = smm_reordered[:, row_col_order_dict["cols"].tolist()]
 
     # For now plot_features is not enabled because it needs soem troubleshooting
     plot_features = False
     if plot_features:
-        plt.rcParams["figure.figsize"] = [15, 5]
+        plt.rcParams["figure.figsize"] = [15, 5] #needs to adapt to number of features
         fig, (ax1, ax2) = plt.subplots(1, 2)
     else:
         plt.rcParams["figure.figsize"] = [10, 5]
@@ -104,12 +88,12 @@ def make_smm_heatmap(cc_obj, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr
         # Prep annotation data for plotting
         if features == None:
             try:
-                features = np.array(cc_obj.adata.uns["rank_genes_groups"]["names"][0].tolist())
+                features = np.array(adata.uns["rank_genes_groups"]["names"][0].tolist())
             except Exception as e:
                 print(e)
                 print("Calculating hard cluster top marker genes for visualization")
-                sc.tl.rank_genes_groups(cc_obj.adata, "hard_clusters", method="logreg")
-                features = np.array(cc_obj.adata.uns["rank_genes_groups"]["names"][0].tolist())
+                sc.tl.rank_genes_groups(adata, "hard_clusters", method="logreg")
+                features = np.array(adata.uns["rank_genes_groups"]["names"][0].tolist())
                 print("marker genes done")
         elif isinstance(features, list):
             features = np.array(features)
@@ -120,12 +104,12 @@ def make_smm_heatmap(cc_obj, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr
         else:
             raise Exception("provided features must be in the form of a list, numpy array, or pandas series")
 
-        if issparse(cc_obj.adata.X):
-            exprs_arr = cc_obj.adata.X[:, :].toarray()[row_order, :][row_col_order_dict["rows"].tolist(), :]
+        if issparse(adata.X):
+            exprs_arr = adata.X[:, :].toarray()[row_order, :][row_col_order_dict["rows"].tolist(), :]
         else:
-            exprs_arr = cc_obj.adata.X[:, :][row_order, :][row_col_order_dict["rows"].tolist(), :]
+            exprs_arr = adata.X[:, :][row_order, :][row_col_order_dict["rows"].tolist(), :]
         print("exprs arr reordered")
-        var_names = cc_obj.adata.var_names
+        var_names = adata.var_names
         exprs_cols_ls = [exprs_arr[:, np.nonzero(var_names.astype(str) == x)[0][0]] for x in features]
         print("exprs_cols_ls done")
         exprs_mat = pd.DataFrame(exprs_cols_ls).T
@@ -160,6 +144,27 @@ def make_smm_heatmap(cc_obj, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr
     else:
         plt.show()
 
+def min_max_scaler(data_1d_vec, min_val=0, max_val=1):
+    """
+    Scale 1D vector between a min and max value.
+
+    Parameters
+    ----------
+    data_1d_vec : array-like
+        The 1D vector to scale.
+    min_val : int, default 0
+        Lower bound on range for scaling.
+    max_val : int, default 1
+        Lower bound on range for scaling.
+
+    Returns
+    -------
+    array-like
+        Data scaled to range specified by min_val and max_val.
+    """
+    x, y = min(data_1d_vec), max(data_1d_vec)
+    scaled_data_1d_vec = (data_1d_vec - x) / (y - x) * (max_val - min_val) + min_val
+    return scaled_data_1d_vec
 
 def slanted_orders(
     data,
@@ -290,3 +295,170 @@ def slanted_orders(
         )
 
     return {"rows": best_rows_permutation, "cols": best_cols_permutation}
+
+
+def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **kwargs):
+    """
+    Generate 2D UMAP embedding.
+
+    UMAP (Uniform Manifold Approximation and Projection) is a manifold learning
+    technique suitable for visualizing high-dimensional data. Besides tending to
+    be faster than tSNE, it optimizes the embedding such that it best reflects
+    the topology of the data, which we represent throughout Scanpy using a
+    neighborhood graph. tSNE, by contrast, optimizes the distribution of
+    nearest-neighbor distances in the embedding such that these best match the
+    distribution of distances in the high-dimensional space.  We use the
+    implementation of `umap-learn <https://github.com/lmcinnes/umap>`.
+    Documentaion of UMAP parameters below is taken directly from umap
+    package documentation.
+
+    Parameters
+    ----------
+    adata : :class:`anndata.AnnData`
+        AnnData object containing results from running ESCHR clustering.
+    return_layout : bool, default False
+        Whether to return layout. If false, layout will be added to adata.
+    n_neighbors : float (optional, default 15)
+        The size of local neighborhood (in terms of number of neighboring
+        sample points) used for manifold approximation. Larger values
+        result in more global views of the manifold, while smaller
+        values result in more local data being preserved. In general
+        values should be in the range 2 to 100.
+    metric: string or function (optional, default 'euclidean')
+        The metric to use to compute distances in high dimensional space.
+        If a string is passed it must match a valid predefined metric. If
+        a general metric is required a function that takes two 1d arrays and
+        returns a float can be provided. For performance purposes it is
+        required that this be a numba jit'd function. Valid string metrics
+        include:
+        * euclidean
+        * manhattan
+        * chebyshev
+        * minkowski
+        * canberra
+        * braycurtis
+        * mahalanobis
+        * wminkowski
+        * seuclidean
+        * cosine
+        * correlation
+        * haversine
+        * hamming
+        * jaccard
+        * dice
+        * russelrao
+        * kulsinski
+        * ll_dirichlet
+        * hellinger
+        * rogerstanimoto
+        * sokalmichener
+        * sokalsneath
+        * yule
+        Metrics that take arguments (such as minkowski, mahalanobis etc.)
+        can have arguments passed via the metric_kwds dictionary. At this
+        time care must be taken and dictionary elements must be ordered
+        appropriately; this will hopefully be fixed in the future.
+    **kwargs
+        These parameters will be passed to the umap init function.
+
+    Returns
+    -------
+    Depending on `return_layout`, returns or updates `adata`
+    with the following fields.
+
+    **X_umap** : `adata.obsm` field
+        UMAP coordinates of data.
+    """
+    
+    if adata.X.shape[1] > 6000:
+        bool_features = calc_highly_variable_genes(adata.X)
+        X = adata.X[:, bool_features]
+    else:
+        X = adata.X
+    X_pca = np.array(calc_pca(X))
+    ### FUNCTIONALITY FOR INITIAL POSITIONS WILL BE ADDED
+    res = umap.UMAP(n_components=2, n_neighbors=n_neighbors, metric=metric, **kwargs).fit_transform(X_pca)
+    if return_layout:
+        return res
+    else:
+        adata.obsm["X_umap"] = res
+
+
+def plot_umap(
+    adata, features=None, cat_palette="tab20", cont_palette="viridis_r", show=True, output_path=None, **kwargs
+):
+    """
+    Make UMAP plot colored by hard clusters and confidence scores.
+
+    Parameters
+    ----------
+    adata : :class:`anndata.AnnData`
+        AnnData object containing results from running ESCHR clustering.
+    features : list of str, default None
+        Option to specify specific features to plot, if None then the method
+        will calulate marker features for each cluster and plot those.
+    cat_cmap : str, default 'tab20'
+        Color map for categorical features.
+    cont_cmap : str, default 'viridis'
+        Color map for continuous features.
+    show : bool, default True
+        Whether to show the plot.
+    output_path : str, default None
+        Path specifying where to save the plot. If none, plot is not saved.
+    **kwargs
+        Args to pass along to matplotlib scatterplot.
+    """
+    # plt.rcParams['figure.figsize'] = [10, 8]
+    # plt.rcParams['figure.dpi'] = 600 # 200 e.g. is really fine, but slower
+
+    try:
+        adata.obsm["X_umap"].shape[1]
+    except Exception as e:
+        print(e)
+        if output_path is not None:
+            try:
+                print("No umap found - checking for existing umap layout file...")
+                adata.obsm["X_umap"] = np.array(
+                    pd.read_csv(os.path.join(("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"))
+                )
+            except Exception as e:
+                print(e)
+                print("No umap found - running umap...")
+                run_umap(adata)
+                pd.DataFrame(adata.obsm['X_umap']).to_csv(os.path.join(("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"), index=None)
+        else:
+            print("No umap found - running umap...")
+            run_umap(adata)
+    # For now specifying plot_features is not available, needs troubleshooting
+    features_to_plot = ["hard_clusters", "uncertainty_score"]
+    ("Done umap, generating figures...")
+    plt.rcParams['figure.figsize'] = [10, 8]
+    if output_path is not None:
+        try:
+            # sc.plt.umap(adata, color=features_to_plot, s=50, frameon=False, ncols=3, palette='tab20', save=output_path)
+            # return_fig=True, show=False)
+            fig = _umap_utils.embedding(
+                adata,
+                color=features_to_plot,
+                frameon=False,
+                ncols=2,
+                palette=cat_palette,
+                cmap="viridis_r",
+                return_fig=True,
+                show=False,
+                **kwargs,
+            )
+            # with PdfPages(output_path) as pp:
+            #    pp.savefig(fig)
+            plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
+            if show:
+                plt.show()
+            else:
+                for fig_x in fig:
+                    plt.close(fig_x)
+        except Exception as e:
+            print(e)
+    else:
+        _umap_utils.embedding(adata, color=features_to_plot, frameon=False, ncols=2, palette=cat_palette, cmap="viridis_r", **kwargs)
+        # palette=cluster_color_dict, edgecolor='none', size = 15, vmax=200)
+        plt.show()
