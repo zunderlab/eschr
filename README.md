@@ -19,8 +19,7 @@ You can try out the method without needing to install ESCHR locally with this [e
 
 You need to have a Python version between 3.8 and 3.10 (inclusive) installed on your system. If you don't have
 Python installed, we recommend installing [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge).
-
-*If you are installing on a Windows OS, you will need to use python version 3.8 only right now as there are issues with installing the nmslib dependency in other versions*
+(*If you are installing on a Windows OS, you will need to use python version 3.8 only due to issues with installing the nmslib dependency in other versions*)
 
 1. Make sure you have Anaconda installed and functional. [Conda FAQ](https://docs.anaconda.com/anaconda/user-guide/faq/) is a great resource for troubleshooting and verifying that everything is working properly.
 2. Open terminal or equivalent command line interface and run `conda create --name <env_name> python=<version>` (e.g. `conda create --name eschrEnv python=3.8`)
