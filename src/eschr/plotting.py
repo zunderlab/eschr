@@ -27,7 +27,7 @@ sys.setrecursionlimit(1000000)
 # flake8: noqa: E266
 
 
-def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", show=True, output_path=None):
+def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", show=True, output_path=None):
     """
     Make a heatmap of soft cluster memberships.
 
@@ -384,7 +384,7 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
         adata.obsm["X_umap"] = res
 
 
-def plot_umap(
+def umap(
     adata, features=None, cat_palette="tab20", cont_palette="viridis_r", show=True, output_path=None, **kwargs
 ):
     """
