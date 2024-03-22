@@ -20,7 +20,7 @@ from scipy.sparse import coo_matrix, csr_matrix, hstack
 from scipy.spatial.distance import pdist, squareform
 from sklearn import metrics
 
-from _base_clustering_utils import run_la_clustering #_base_clustering_utils _leiden
+from _leiden import run_la_clustering #_base_clustering_utils _leiden
 from _prune_features import calc_highly_variable_genes, calc_pca #ADD BACK PRECEDING DOTS
 
 ## End Import packages section=================================================
