@@ -12,26 +12,19 @@
 ## Consensus Cluster
 
 ```{eval-rst}
-.. automodule:: eschr.consensus_cluster
-   :members: ConsensusCluster
-   :show-inheritance:
+.. autosummary::
+   :toctree: .
+
+   tl.consensus_cluster
 ```
 
 ## Plotting
 
 ```{eval-rst}
-.. automodule:: eschr.smm_heatmap
-   :members: make_smm_heatmap
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
-```
+.. autosummary::
+   :toctree: .
 
-```{eval-rst}
-.. automodule:: eschr.umap
-   :members: plot_umap
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   pl.smm_heatmap
+   pl.umap
 ```
 
