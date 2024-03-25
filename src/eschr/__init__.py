@@ -4,7 +4,7 @@ from importlib.metadata import version
 #from eschr.plotting import smm_heatmap, umap
 #from eschr import pl, tl
 #from eschr import tl
-from . import pl, tl, readwrite
+from . import tl, readwrite
 
 
 #from __future__ import absolute_import
