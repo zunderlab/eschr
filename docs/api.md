@@ -26,16 +26,5 @@
     tl.consensus_cluster
 ```
 
-## Plotting
 
-```{eval-rst}
-.. module:: eschr.pl
-.. currentmodule:: eschr
-
-.. autosummary::
-    :toctree: .
-
-    pl.smm_heatmap
-    pl.umap
-```
 
