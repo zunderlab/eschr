@@ -1,1 +1,1 @@
-from eschr.plotting import smm_heatmap, umap
+from .plotting import smm_heatmap, umap
