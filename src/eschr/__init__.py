@@ -1,9 +1,10 @@
 from importlib.metadata import version
 
-from eschr.read_write_utils import csv_to_zarr, make_zarr
-from eschr.plotting import smm_heatmap, umap
-from eschr import pl, tl
+#from eschr.read_write_utils import csv_to_zarr, make_zarr
+#from eschr.plotting import smm_heatmap, umap
+#from eschr import pl, tl
 #from eschr import tl
+from . import pl, tl, readwrite
 
 
 #from __future__ import absolute_import
@@ -11,7 +12,7 @@ from eschr import pl, tl
 #import eschr.consensus_cluster
 #import eschr.pl
 
-#__all__ = ["pl", "tl", "csv_to_zarr", "make_zarr"]
+__all__ = ["pl", "tl", "readwrite"]
 
 #from .version import __version__
 __version__ = version("eschr")

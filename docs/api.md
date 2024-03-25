@@ -3,14 +3,14 @@
 ## Read and write zarr files
 
 ```{eval-rst}
-.. module:: eschr.read_write_utils
+.. module:: eschr.readwrite
 .. currentmodule:: eschr
 
 .. autosummary::
     :toctree: .
 
-    read_write_utils.csv_to_zarr
-    read_write_utils.make_zarr
+    readwrite.csv_to_zarr
+    readwrite.make_zarr
     
 ```
 
