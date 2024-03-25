@@ -1,14 +1,11 @@
-```{eval-rst}
-.. module:: eschr
-.. automodule:: eschr
-   :noindex:
-```
-
 # API
 
 ## Read and write zarr files
 
 ```{eval-rst}
+.. module:: eschr.read_write_utils
+.. currentmodule:: eschr
+
 .. autosummary::
     :toctree: .
 
@@ -20,6 +17,9 @@
 ## Consensus Cluster
 
 ```{eval-rst}
+.. module:: eschr.tl
+.. currentmodule:: eschr
+
 .. autosummary::
     :toctree: .
 
@@ -29,6 +29,9 @@
 ## Plotting
 
 ```{eval-rst}
+.. module:: eschr.pl
+.. currentmodule:: eschr
+
 .. autosummary::
     :toctree: .
 
