@@ -3,10 +3,11 @@
 ## Read and write zarr files
 
 ```{eval-rst}
-.. automodule:: eschr.read_write_utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. autosummary::
+   :toctree: .
+
+    read_write_utils.csv_to_zarr
+    read_write_utils.make_zarr
 ```
 
 ## Consensus Cluster
