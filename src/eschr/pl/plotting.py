@@ -12,7 +12,7 @@ from scipy.sparse import issparse
 from scipy.spatial.distance import pdist
 import umap
 
-from ._prune_features import calc_highly_variable_genes, calc_pca
+from ..tl._prune_features import calc_highly_variable_genes, calc_pca
 from . import _umap_utils
 
 mpl.use("Agg")  # this makes plt.show not work
