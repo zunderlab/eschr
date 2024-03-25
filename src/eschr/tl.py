@@ -1,1 +1,1 @@
-from eschr.consensus_cluster import consensus_cluster
+from .consensus_cluster import consensus_cluster
