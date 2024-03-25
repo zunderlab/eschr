@@ -1,3 +1,9 @@
+```{eval-rst}
+.. module:: eschr
+.. automodule:: eschr
+   :noindex:
+```
+
 # API
 
 ## Read and write zarr files
