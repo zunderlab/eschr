@@ -1,9 +1,9 @@
 from importlib.metadata import version
 
-from .read_write_utils import csv_to_zarr, make_zarr
-from .plotting import smm_heatmap, umap
-from . import pl
-from . import tl
+from eschr.read_write_utils import csv_to_zarr, make_zarr
+from eschr.plotting import smm_heatmap, umap
+from eschr import pl, tl
+#from eschr import tl
 
 
 #from __future__ import absolute_import
