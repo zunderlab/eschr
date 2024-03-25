@@ -4,28 +4,29 @@
 
 ```{eval-rst}
 .. autosummary::
-   :toctree: .
+    :toctree: .
 
     read_write_utils.csv_to_zarr
     read_write_utils.make_zarr
+    
 ```
 
 ## Consensus Cluster
 
 ```{eval-rst}
 .. autosummary::
-   :toctree: .
+    :toctree: .
 
-   tl.consensus_cluster
+    tl.consensus_cluster
 ```
 
 ## Plotting
 
 ```{eval-rst}
 .. autosummary::
-   :toctree: .
+    :toctree: .
 
-   pl.smm_heatmap
-   pl.umap
+    pl.smm_heatmap
+    pl.umap
 ```
 
