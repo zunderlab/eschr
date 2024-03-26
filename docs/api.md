@@ -7,7 +7,7 @@
 .. currentmodule:: eschr
 
 .. autosummary::
-    :toctree: .
+    :toctree: generated
 
     readwrite.csv_to_zarr
     readwrite.make_zarr
@@ -21,7 +21,7 @@
 .. currentmodule:: eschr
 
 .. autosummary::
-    :toctree: .
+    :toctree: generated
 
     tl.consensus_cluster
 ```
