@@ -122,6 +122,10 @@ ignore = [
     "D203",
     # We want docstrings to start immediately after the opening triple quote
     "D213",
+    # I am ok with blind exception calls for now, will fix later
+    "B902",
+    # I use multiple # for identifying diff types of comments to myself
+    "E266",
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -142,12 +146,4 @@ skip = [
     "docs/references.bib",
     "docs/references.md",
     "docs/notebooks/example.ipynb",
-]
-
-[tool.ruff]
-ignore = [
-    # I am ok with blind exception calls for now, will fix later
-    "B902",
-    # I use multiple # for identifying diff types of comments to myself
-    "E266"
 ]
