@@ -123,6 +123,16 @@ def parmap(f, X, nprocs=1):
 
 
 def make_zarr(adata, zarr_loc):
+    """
+    Make zarr data store.
+
+    Parameters
+    ----------
+    adata : `anndata.AnnData`
+        AnnData object containing preprocessed data to be clustered in slot `.X`
+    zarr_loc : str
+        Path to save zarr store which will hold the data to be clustered.
+    """
     if zarr_loc == None:
         zarr_loc = os.getcwd() +"/data_store.zarr"
     print("storing zarr data object as " + zarr_loc)
@@ -186,8 +196,6 @@ def get_hyperparameters(k_range, la_res_range, metric=None):
     la_res_range : tuple of (int, int)
         Upper and lower limits for selecting random resolution
         parameter for leiden community detection.
-    n : int
-        Number of data points/instances/cells.
     metric : {‘euclidean’, ‘cosine’, None}, optional
         Which distance metric to use for calculating kNN graph for clustering.
         For now, one of ('cosine', 'euclidean'), plan to add
@@ -203,8 +211,6 @@ def get_hyperparameters(k_range, la_res_range, metric=None):
         Which distance metric to use for calculating kNN graph for clustering.
         For now, one of ('cosine', 'euclidean'), plan to add
         correlation when I can find a fast enough implementation.
-    subsample_size : int
-        The number of data points/instances/cells to sample.
     """
     k = random.sample(range(k_range[0], k_range[1]), 1)[0]
     la_res = random.sample(range(la_res_range[0], la_res_range[1]), 1)[0]
@@ -254,16 +260,10 @@ def run_base_clustering(args_in):
 
     Returns
     -------
-    A list of the following:
-    [coo_matrix(c).tocsr(), np.expand_dims(per_iter_clust_assigns, axis=1)]
-
     coo_matrix(c).tocsr() : :class:`~scipy.sparse.spmatrix`
         Matrix of dimensions n (total number of data points) by
         m (number of clusters) and filled with 1/0 binary occupancy
         of data point per cluster.
-    np.expand_dims(per_iter_clust_assigns, axis=1) : ndarray of shape (n, 1)
-        One-dimensional array containing zeroes for data points that were not
-        sampled, cluster id +1 for sampled data points.
     """
     try:
         # LOAD DATA
@@ -366,7 +366,7 @@ def consensus_cluster_leiden(in_args):
 
     Parameters
     ----------
-    args_in : zip
+    in_args : zip
         List containing (1) the number of data points, (2) the bipartite
         leiden clustering resolution, and (3) the bipartite graph generated
         from the ensemble of clusterings.
@@ -379,11 +379,6 @@ def consensus_cluster_leiden(in_args):
         Matrix of dimensions n (total number of data points) by
         m (number of consensus clusters) and filled with membership ratio
         of data point per cluster.
-    ari : float
-        Adjusted Rand Index between cluster membership assignments derived
-        from clustering of clusters and majority voting for hard assignments
-        versus the hard cluster memberships of the data points directly
-        resulting from the bipartite clustering.
     i : float
         Bipartite leiden resolution parameter, a sanity check to ensure
         parallel processing maintains expected order of resolutions
@@ -428,7 +423,6 @@ def ensemble(zarr_loc,
             reduction,
             metric,
             ensemble_size,
-            auto_stop,
             k_range,
             la_res_range,
             nprocs
@@ -472,11 +466,6 @@ def ensemble(zarr_loc,
         Adjacency matrix generated from the ensemble of clusterings, where
         data points have edges to clusters they were assigned to in
         each ensemble member where they were included.
-    per_iter_clust_assigns : :class:`~scipy.sparse.csr_matrix`
-        Each column is an iteration of the ensemble of clusterings, rows are
-        data points, and array is filled with cluster assignments per iteration
-        from 1 to m clusters. 0 indicates the data point was not included in
-        that ensemble member.
     """
     start_time = time.perf_counter()
 
@@ -498,7 +487,7 @@ def ensemble(zarr_loc,
 
     return clust_out
 
-def consensus(n, bg, nprocs, out_dir=None):
+def consensus(n, bg, nprocs):
     """
     Find consensus from ensemble of clusterings.
 
