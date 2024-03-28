@@ -31,7 +31,9 @@ def get_igraph_from_adjacency(adjacency, directed=None):
 
 
 # Util adapted from scanpy:
-def _get_sparse_matrix_from_indices_distances_umap(knn_indices, knn_dists, n_obs, n_neighbors):
+def _get_sparse_matrix_from_indices_distances_umap(
+    knn_indices, knn_dists, n_obs, n_neighbors
+):
     rows = np.zeros((n_obs * knn_indices.shape[1]), dtype=np.int64)  # n_neighbors
     cols = np.zeros((n_obs * knn_indices.shape[1]), dtype=np.int64)  # n_neighbors
     vals = np.zeros((n_obs * knn_indices.shape[1]), dtype=np.float64)  # n_neighbors
@@ -83,7 +85,9 @@ def run_la_clustering(X, k, la_res, metric="euclidean", method="sw-graph"):
     else:
         vcount = X.shape[0]
     # Get k nearest neighbors to input for clustering
-    nbrs = NMSlibTransformer(n_neighbors=k, metric=metric, method=method)  # .fit_transform(ds_sub)
+    nbrs = NMSlibTransformer(
+        n_neighbors=k, metric=metric, method=method
+    )  # .fit_transform(ds_sub)
 
     knn_indices, knn_distances = nbrs.fit_transform(X)  # nbrs.kneighbors(ds_sub)
 
@@ -98,7 +102,9 @@ def run_la_clustering(X, k, la_res, metric="euclidean", method="sw-graph"):
     # Extract info from nearest neighbors and create iGraph object
     knn_graph = get_igraph_from_adjacency(adjacency=adjacency_sparse, directed=None)
     # get Leiden clusters
-    leiden_out = la.find_partition(knn_graph, la.RBConfigurationVertexPartition, resolution_parameter=la_res)
+    leiden_out = la.find_partition(
+        knn_graph, la.RBConfigurationVertexPartition, resolution_parameter=la_res
+    )
     # time_leiden = time.time() - start_time
     # print ("time to run leiden clustering: " + str(time_leiden))
     return np.array([leiden_out.membership])

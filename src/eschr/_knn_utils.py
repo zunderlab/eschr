@@ -47,7 +47,11 @@ class NMSlibTransformer(TransformerMixin, BaseEstimator):
             }[self.metric]
             if space == "jaccard_sparse":
                 # print('jaccard_sparse')
-                self.nmslib_ = nmslib.init(method=self.method, space=space, data_type=nmslib.DataType.OBJECT_AS_STRING)
+                self.nmslib_ = nmslib.init(
+                    method=self.method,
+                    space=space,
+                    data_type=nmslib.DataType.OBJECT_AS_STRING,
+                )
                 self.nmslib_.addDataPointBatch(X)
                 # Set index parameters
                 # These are the most important ones
@@ -57,7 +61,9 @@ class NMSlibTransformer(TransformerMixin, BaseEstimator):
                 self.nmslib_.createIndex(index_time_params)
             elif isinstance(X, csr_matrix):
                 self.nmslib_ = nmslib.init(
-                    method=self.method, space="l2_sparse", data_type=nmslib.DataType.SPARSE_VECTOR
+                    method=self.method,
+                    space="l2_sparse",
+                    data_type=nmslib.DataType.SPARSE_VECTOR,
                 )
                 self.nmslib_.addDataPointBatch(X)
                 indexParams = {"efConstruction": (self.n_neighbors + 1)}

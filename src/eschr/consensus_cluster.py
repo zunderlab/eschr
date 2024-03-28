@@ -102,7 +102,10 @@ def parmap(f, X, nprocs=1):
         return list(map(ehf, X))
     q_in = multiprocessing.Queue(1)
     q_out = multiprocessing.Queue()
-    proc = [multiprocessing.Process(target=_parmap_fun, args=(f, q_in, q_out)) for _ in range(nprocs)]
+    proc = [
+        multiprocessing.Process(target=_parmap_fun, args=(f, q_in, q_out))
+        for _ in range(nprocs)
+    ]
     for p in proc:
         p.daemon = True
         p.start()
@@ -275,7 +278,9 @@ def run_base_clustering(args_in):
         iter_k_range = (int(k_floor), int(k_ceil))
 
         # Get hyperparameter settings for this ensemble member
-        iter_k, la_res, metric = get_hyperparameters(iter_k_range, args_in[0][1], args_in[0][2])
+        iter_k, la_res, metric = get_hyperparameters(
+            iter_k_range, args_in[0][1], args_in[0][2]
+        )
         ## Log transform features if it is scRNAseq that has not yet been transformed
         ## REMOVE FOR PUBLIC METHOD!!!
         if data.shape[1] > 8000:
@@ -289,7 +294,9 @@ def run_base_clustering(args_in):
         ## Data subspace feature extraction
         data = run_pca_dim_reduction(data)
         ## Run leiden clustering
-        clusters = run_la_clustering(X=data, k=iter_k, la_res=la_res / 100, metric=metric)
+        clusters = run_la_clustering(
+            X=data, k=iter_k, la_res=la_res / 100, metric=metric
+        )
         ## Prepare outputs for this ensemble member
         per_iter_clust_assigns = np.zeros((n_orig), dtype=np.uint8)
         per_iter_clust_assigns[subsample_ids] = clusters + 1
@@ -300,7 +307,12 @@ def run_base_clustering(args_in):
         b = np.ones((n_orig), dtype=np.uint8)
         c = np.zeros((n_orig, len(np.unique(a))), dtype=np.uint8)
         # print(c[0:50,0:3])
-        np.put_along_axis(arr=c, indices=np.expand_dims(a, axis=1), values=np.expand_dims(b, axis=1), axis=1)  # )#,
+        np.put_along_axis(
+            arr=c,
+            indices=np.expand_dims(a, axis=1),
+            values=np.expand_dims(b, axis=1),
+            axis=1,
+        )  # )#,
         # print(c[0:50,0:3])
         c = np.delete(c, 0, 1)
     except Exception as ex:
@@ -334,10 +346,17 @@ def get_hard_soft_clusters(n, clustering, bg):
     clust_occ_arr = np.zeros((n, len(cells_clusts)), int)
     for v in range(len(cells_clusts)):
         cluster_id = cells_clusts[v]
-        cluster_memb = [clusters_vertex_ids[i] for i, j in enumerate(clustering) if j == cluster_id]
-        node_subset, counts = np.unique([e.source for e in bg.es.select(_source_in=cluster_memb)], return_counts=True)
+        cluster_memb = [
+            clusters_vertex_ids[i] for i, j in enumerate(clustering) if j == cluster_id
+        ]
+        node_subset, counts = np.unique(
+            [e.source for e in bg.es.select(_source_in=cluster_memb)],
+            return_counts=True,
+        )
         clust_occ_arr[node_subset, v] = counts
-    hard_clusters = np.array([np.random.choice(np.where(row == row.max())[0]) for row in clust_occ_arr])
+    hard_clusters = np.array(
+        [np.random.choice(np.where(row == row.max())[0]) for row in clust_occ_arr]
+    )
     soft_membership_matrix = clust_occ_arr / clust_occ_arr.sum(axis=1, keepdims=True)
     return hard_clusters, soft_membership_matrix
 
@@ -377,28 +396,47 @@ def consensus_cluster_leiden(in_args):
     # print(i)
     # Make bipartite igraph from sparse matrix
     bipartite = Graph(
-        np.concatenate((np.expand_dims(in_args[2].row, axis=1), np.expand_dims(in_args[2].col + n, axis=1)), axis=1)
+        np.concatenate(
+            (
+                np.expand_dims(in_args[2].row, axis=1),
+                np.expand_dims(in_args[2].col + n, axis=1),
+            ),
+            axis=1,
+        )
     ).as_undirected()
     type_ls = [0] * n  # self.
     type_ls.extend([1] * (bipartite.vcount() - n))  # self.
     bipartite.vs["type"] = type_ls  # self.
     assert bipartite.is_bipartite()
-    p_01, p_0, p_1 = la.CPMVertexPartition.Bipartite(bipartite, resolution_parameter_01=i)
+    p_01, p_0, p_1 = la.CPMVertexPartition.Bipartite(
+        bipartite, resolution_parameter_01=i
+    )
     optimiser = la.Optimiser()
-    diff = optimiser.optimise_partition_multiplex(partitions=[p_01, p_0, p_1], layer_weights=[1, -1, -1])
+    diff = optimiser.optimise_partition_multiplex(
+        partitions=[p_01, p_0, p_1], layer_weights=[1, -1, -1]
+    )
     clustering = np.array(p_01.membership)[
         np.where(bipartite.vs["type"])[0]
     ]  # just select clusters assigns for clusters
     clustering_cells = np.array(p_01.membership)[
         [i for i, val in enumerate(bipartite.vs["type"]) if not val]
     ]  # just select clusters assigns for cells?
-    hard_clusters, soft_membership_matrix = get_hard_soft_clusters(n, clustering, bipartite)  # , clust_occ_arr
+    hard_clusters, soft_membership_matrix = get_hard_soft_clusters(
+        n, clustering, bipartite
+    )  # , clust_occ_arr
 
     # convert resulting membership back to ratio*
-    soft_membership_matrix = np.divide(soft_membership_matrix, soft_membership_matrix.sum(axis=1)[:, None])  # [:,None]
+    soft_membership_matrix = np.divide(
+        soft_membership_matrix, soft_membership_matrix.sum(axis=1)[:, None]
+    )  # [:,None]
     # calculate final hard clusters based on majority vote by membership
     hard_clusters = pd.Categorical(
-        np.array([np.random.choice(np.where(row == row.max())[0]) for row in soft_membership_matrix])
+        np.array(
+            [
+                np.random.choice(np.where(row == row.max())[0])
+                for row in soft_membership_matrix
+            ]
+        )
     )
     # print("row sums: " + str(np.unique(final_smm.sum(axis=1))))
     # print(
@@ -547,7 +585,10 @@ class ConsensusCluster:
 
         data_iterator = repeat(self.zarr_loc, self.ensemble_size)
 
-        hyperparam_iterator = [[self.k_range, self.la_res_range, self.metric] for x in range(self.ensemble_size)]
+        hyperparam_iterator = [
+            [self.k_range, self.la_res_range, self.metric]
+            for x in range(self.ensemble_size)
+        ]
         args = list(zip(hyperparam_iterator, data_iterator))
 
         print("starting ensemble clustering multiprocess")
@@ -562,9 +603,13 @@ class ConsensusCluster:
             # filename="/project/zunderlab/sarah_data/project_ConsensusClusteringMethod/github_package/v_no_error_output"
             # joblib.dump(out, out_dir + "v_no_error_output.sav")
         except Exception:
-            print("consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])")
+            print(
+                "consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])"
+            )
 
-        per_iter_clust_assigns = csr_matrix(coo_matrix(np.concatenate(out[:, 1], axis=1)))
+        per_iter_clust_assigns = csr_matrix(
+            coo_matrix(np.concatenate(out[:, 1], axis=1))
+        )
 
         finish_time = time.perf_counter()
         print(f"Ensemble clustering finished in {finish_time-start_time} seconds")
@@ -594,7 +639,9 @@ class ConsensusCluster:
         ## Run final consensus
         time.time()
 
-        res_ls = [x / 1000 for x in range(50, 725, 25)]  # 0.05 to 0.7 inclusive by 0.025
+        res_ls = [
+            x / 1000 for x in range(50, 725, 25)
+        ]  # 0.05 to 0.7 inclusive by 0.025
 
         print("starting consensus multiprocess")
         start_time = time.perf_counter()
@@ -606,13 +653,17 @@ class ConsensusCluster:
         hard_clusters = [x[0] for x in out]
         soft_clusters = [x[1] for x in out]
         ress = [x[2] for x in out]
-        out = pd.DataFrame({"x": hard_clusters, "y": soft_clusters, "z": ress}).to_numpy()
+        out = pd.DataFrame(
+            {"x": hard_clusters, "y": soft_clusters, "z": ress}
+        ).to_numpy()
         try:
             out = out[np.argsort(out[:, 2])]
             # filename="/project/zunderlab/sarah_data/project_ConsensusClusteringMethod/github_package/v_no_error_output"
             # joblib.dump(out, out_dir + "v_no_error_output.sav")
         except Exception as e:
-            print("consensus_cluster.py, line ~665, in transform: out = out[np.argsort(out[:,3])]")
+            print(
+                "consensus_cluster.py, line ~665, in transform: out = out[np.argsort(out[:,3])]"
+            )
             print("Error: ")
             print(e)
             # try:
@@ -623,7 +674,8 @@ class ConsensusCluster:
         # assert out[:, 3] == res_ls, "Warning: resolution order is wrong"
 
         indices = [
-            index for index, value in sorted(enumerate(list(out[:, 2])), key=lambda x: x[1])
+            index
+            for index, value in sorted(enumerate(list(out[:, 2])), key=lambda x: x[1])
         ]  # in case parallel returned in wrong order
         all_clusterings = [pd.DataFrame(x, dtype=int) for x in out[indices, 0]]
         all_clusterings_df = pd.concat(all_clusterings, axis=1)
@@ -637,7 +689,8 @@ class ConsensusCluster:
 
         # find res with minimum sum of distances to all other res
         dist = pdist(
-            self.multiresolution_clusters.T, metric=lambda u, v: 1 - metrics.adjusted_rand_score(u, v)
+            self.multiresolution_clusters.T,
+            metric=lambda u, v: 1 - metrics.adjusted_rand_score(u, v),
         )  # metric='correlation' lambda u, v: metrics.adjusted_rand_score(u,v))
         opt_res_idx = np.argmin(squareform(dist).sum(axis=0))
         # extract final hard and soft clusters for selected optimal resolution
@@ -683,7 +736,9 @@ class ConsensusCluster:
         time_per_iter = time.time() - start_time
         print("Full runtime: " + str(time_per_iter))
 
-    def make_adata(self, data=None, feature_names=None, sample_names=None, return_adata=False):
+    def make_adata(
+        self, data=None, feature_names=None, sample_names=None, return_adata=False
+    ):
         """
         Make annotated data object.
 
@@ -723,7 +778,10 @@ class ConsensusCluster:
             self.adata = anndata.AnnData(
                 X=coo_matrix(
                     (z1["X"]["data"][:], (z1["X"]["row"][:], z1["X"]["col"][:])),
-                    shape=[np.max(z1["X"]["row"][:]) + 1, np.max(z1["X"]["col"][:]) + 1],
+                    shape=[
+                        np.max(z1["X"]["row"][:]) + 1,
+                        np.max(z1["X"]["col"][:]) + 1,
+                    ],
                 ).tocsr()
             )
 
