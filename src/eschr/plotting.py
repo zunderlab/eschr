@@ -7,13 +7,13 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 import seaborn as sns
+import umap
 from scipy.cluster import hierarchy
 from scipy.sparse import issparse
 from scipy.spatial.distance import pdist
-import umap
 
-from ._prune_features import calc_highly_variable_genes, calc_pca
 from . import _umap_utils
+from ._prune_features import calc_highly_variable_genes, calc_pca
 
 mpl.use("Agg")  # this makes plt.show not work
 
@@ -68,7 +68,7 @@ def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr"
     # For now plot_features is not enabled because it needs soem troubleshooting
     plot_features = False
     if plot_features:
-        plt.rcParams["figure.figsize"] = [15, 5] #needs to adapt to number of features
+        plt.rcParams["figure.figsize"] = [15, 5]  # needs to adapt to number of features
         fig, (ax1, ax2) = plt.subplots(1, 2)
     else:
         plt.rcParams["figure.figsize"] = [10, 5]
@@ -144,6 +144,7 @@ def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr"
     else:
         plt.show()
 
+
 def min_max_scaler(data_1d_vec, min_val=0, max_val=1):
     """
     Scale 1D vector between a min and max value.
@@ -165,6 +166,7 @@ def min_max_scaler(data_1d_vec, min_val=0, max_val=1):
     x, y = min(data_1d_vec), max(data_1d_vec)
     scaled_data_1d_vec = (data_1d_vec - x) / (y - x) * (max_val - min_val) + min_val
     return scaled_data_1d_vec
+
 
 def slanted_orders(
     data,
@@ -369,7 +371,7 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
     **X_umap** : `adata.obsm` field
         UMAP coordinates of data.
     """
-    
+
     if adata.X.shape[1] > 6000:
         bool_features = calc_highly_variable_genes(adata.X)
         X = adata.X[:, bool_features]
@@ -425,14 +427,16 @@ def plot_umap(
                 print(e)
                 print("No umap found - running umap...")
                 run_umap(adata)
-                pd.DataFrame(adata.obsm['X_umap']).to_csv(os.path.join(("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"), index=None)
+                pd.DataFrame(adata.obsm["X_umap"]).to_csv(
+                    os.path.join(("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"), index=None
+                )
         else:
             print("No umap found - running umap...")
             run_umap(adata)
     # For now specifying plot_features is not available, needs troubleshooting
     features_to_plot = ["hard_clusters", "uncertainty_score"]
     ("Done umap, generating figures...")
-    plt.rcParams['figure.figsize'] = [10, 8]
+    plt.rcParams["figure.figsize"] = [10, 8]
     if output_path is not None:
         try:
             # sc.plt.umap(adata, color=features_to_plot, s=50, frameon=False, ncols=3, palette='tab20', save=output_path)
@@ -459,6 +463,8 @@ def plot_umap(
         except Exception as e:
             print(e)
     else:
-        _umap_utils.embedding(adata, color=features_to_plot, frameon=False, ncols=2, palette=cat_palette, cmap="viridis_r", **kwargs)
+        _umap_utils.embedding(
+            adata, color=features_to_plot, frameon=False, ncols=2, palette=cat_palette, cmap="viridis_r", **kwargs
+        )
         # palette=cluster_color_dict, edgecolor='none', size = 15, vmax=200)
         plt.show()

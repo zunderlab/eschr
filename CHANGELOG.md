@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning][].
 
 ## [Unreleased]
 
-- will be adding tests, logging, and improving documentation 
+-   will be adding tests, logging, and improving documentation
 
 ## [v0.2.0]
 
 ### Changed
 
--   Updated ensemble clustering to include scaling the k hyperparameter range based on dataset size, yielding more consistent performance 
+-   Updated ensemble clustering to include scaling the k hyperparameter range based on dataset size, yielding more consistent performance
 
 ## [v0.1.0]
 

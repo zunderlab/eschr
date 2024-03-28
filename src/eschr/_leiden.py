@@ -1,4 +1,5 @@
 import warnings
+
 import igraph as ig
 import leidenalg as la
 import numpy as np

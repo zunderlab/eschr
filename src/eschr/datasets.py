@@ -1,4 +1,4 @@
-# Adapted from: https://github.com/theislab/cellrank.git 
+# Adapted from: https://github.com/theislab/cellrank.git
 # and https://github.com/LouisFaure/scFates.git
 
 import os
@@ -26,6 +26,7 @@ _datasets = {
     "reprogramming_schiebinger_serum_subset": ("https://figshare.com/ndownloader/files/35858033", (165892, 19089)),
     "bone_marrow": ("https://figshare.com/ndownloader/files/35826944", (5780, 27876)),
 }
+
 
 def _load_dataset_from_url(
     fpath: Union[str, pathlib.Path], url: str, expected_shape: Tuple[int, int], **kwargs: Any
@@ -129,7 +130,6 @@ def lung(
     Annotated data object.
     """
     return _load_dataset_from_url(path, *_datasets["lung"], **kwargs)
-
 
 
 def reprogramming_schiebinger(

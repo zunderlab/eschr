@@ -13,13 +13,14 @@ ESCHR: A hyperparameter-randomized ensemble approach for robust clustering acros
 ![alt text](./docs/figure_1_schematic_v4.png)
 
 ## Quick Start
-You can try out the method without needing to install ESCHR locally with this [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb) 
+
+You can try out the method without needing to install ESCHR locally with this [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb)
 
 ## Installation
 
 You need to have a Python version between 3.8 and 3.10 (inclusive) installed on your system. If you don't have
 Python installed, we recommend installing [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge).
-(*If you are installing on a Windows OS, you will need to use python version 3.8 only due to issues with installing the nmslib dependency in other versions*)
+(_If you are installing on a Windows OS, you will need to use python version 3.8 only due to issues with installing the nmslib dependency in other versions_)
 
 1. Make sure you have Anaconda installed and functional. [Conda FAQ](https://docs.anaconda.com/anaconda/user-guide/faq/) is a great resource for troubleshooting and verifying that everything is working properly.
 2. Open terminal or equivalent command line interface and run `conda create --name <env_name> python=<version>` (e.g. `conda create --name eschrEnv python=3.8`)
@@ -122,7 +123,7 @@ Now you can run code adapted from the example run scripts above or copy and past
 
 ## Release notes
 
-*Note: pre-release v0.1.0 was used for making figures in the submitted manuscript*
+_Note: pre-release v0.1.0 was used for making figures in the submitted manuscript_
 
 See the [changelog][changelog].
 
