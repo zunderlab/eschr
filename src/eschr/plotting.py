@@ -7,13 +7,13 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 import seaborn as sns
+import umap
 from scipy.cluster import hierarchy
 from scipy.sparse import issparse
 from scipy.spatial.distance import pdist
-import umap
 
-from ._prune_features import calc_highly_variable_genes, calc_pca
 from . import _umap_utils
+from ._prune_features import calc_highly_variable_genes, calc_pca
 
 mpl.use("Agg")  # this makes plt.show not work
 
@@ -27,7 +27,14 @@ sys.setrecursionlimit(1000000)
 # flake8: noqa: E266
 
 
-def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", show=True, output_path=None):
+def make_smm_heatmap(
+    adata,
+    features=None,
+    smm_cmap="gray_r",
+    feat_cmap="YlOrBr",
+    show=True,
+    output_path=None,
+):
     """
     Make a heatmap of soft cluster memberships.
 
@@ -49,9 +56,13 @@ def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr"
     """
     # Prep soft membership matrix data for plotting
     hard_clust = np.unique(adata.obs["hard_clusters"])
-    adata.obsm["soft_membership_matrix"] = adata.obsm["soft_membership_matrix"][:, hard_clust]
+    adata.obsm["soft_membership_matrix"] = adata.obsm["soft_membership_matrix"][
+        :, hard_clust
+    ]
     row_order = hierarchy.dendrogram(
-        hierarchy.linkage(pdist(adata.obsm["soft_membership_matrix"]), method="average"),
+        hierarchy.linkage(
+            pdist(adata.obsm["soft_membership_matrix"]), method="average"
+        ),
         no_plot=True,
         color_threshold=-np.inf,
     )["leaves"]
@@ -62,13 +73,15 @@ def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr"
         squared_order=True,
         discount_outliers=True,
     )
-    smm_reordered = adata.obsm["soft_membership_matrix"][row_order, :][row_col_order_dict["rows"].tolist(), :]
+    smm_reordered = adata.obsm["soft_membership_matrix"][row_order, :][
+        row_col_order_dict["rows"].tolist(), :
+    ]
     smm_reordered = smm_reordered[:, row_col_order_dict["cols"].tolist()]
 
     # For now plot_features is not enabled because it needs soem troubleshooting
     plot_features = False
     if plot_features:
-        plt.rcParams["figure.figsize"] = [15, 5] #needs to adapt to number of features
+        plt.rcParams["figure.figsize"] = [15, 5]  # needs to adapt to number of features
         fig, (ax1, ax2) = plt.subplots(1, 2)
     else:
         plt.rcParams["figure.figsize"] = [10, 5]
@@ -102,18 +115,28 @@ def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr"
         elif isinstance(features, np.ndarray):
             features = features
         else:
-            raise Exception("provided features must be in the form of a list, numpy array, or pandas series")
+            raise Exception(
+                "provided features must be in the form of a list, numpy array, or pandas series"
+            )
 
         if issparse(adata.X):
-            exprs_arr = adata.X[:, :].toarray()[row_order, :][row_col_order_dict["rows"].tolist(), :]
+            exprs_arr = adata.X[:, :].toarray()[row_order, :][
+                row_col_order_dict["rows"].tolist(), :
+            ]
         else:
-            exprs_arr = adata.X[:, :][row_order, :][row_col_order_dict["rows"].tolist(), :]
+            exprs_arr = adata.X[:, :][row_order, :][
+                row_col_order_dict["rows"].tolist(), :
+            ]
         print("exprs arr reordered")
         var_names = adata.var_names
-        exprs_cols_ls = [exprs_arr[:, np.nonzero(var_names.astype(str) == x)[0][0]] for x in features]
+        exprs_cols_ls = [
+            exprs_arr[:, np.nonzero(var_names.astype(str) == x)[0][0]] for x in features
+        ]
         print("exprs_cols_ls done")
         exprs_mat = pd.DataFrame(exprs_cols_ls).T
-        exprs_mat = exprs_mat.reindex(columns=exprs_mat.columns[row_col_order_dict["cols"].tolist()])
+        exprs_mat = exprs_mat.reindex(
+            columns=exprs_mat.columns[row_col_order_dict["cols"].tolist()]
+        )
         exprs_mat.columns = features[row_col_order_dict["cols"].tolist()]
         print("reindex done")
         exprs_mat = exprs_mat.apply(min_max_scaler, axis=1)
@@ -128,7 +151,9 @@ def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr"
         )
 
         annotations_heatmap.set_xticklabels(
-            annotations_heatmap.get_xticklabels(), rotation=30, horizontalalignment="right"
+            annotations_heatmap.get_xticklabels(),
+            rotation=30,
+            horizontalalignment="right",
         )
 
     if output_path is not None:
@@ -140,9 +165,12 @@ def make_smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr"
                 plt.close(annotations_heatmap)
         except Exception as e:
             print(e)
-            print("You must provide an directory path to output_dir if save_plot is True")
+            print(
+                "You must provide an directory path to output_dir if save_plot is True"
+            )
     else:
         plt.show()
+
 
 def min_max_scaler(data_1d_vec, min_val=0, max_val=1):
     """
@@ -165,6 +193,7 @@ def min_max_scaler(data_1d_vec, min_val=0, max_val=1):
     x, y = min(data_1d_vec), max(data_1d_vec)
     scaled_data_1d_vec = (data_1d_vec - x) / (y - x) * (max_val - min_val) + min_val
     return scaled_data_1d_vec
+
 
 def slanted_orders(
     data,
@@ -224,7 +253,13 @@ def slanted_orders(
             data = data * data
 
         def reorder_phase(
-            data, best_rows_permutation, best_cols_permutation, row_indices, col_indices, rows_count, cols_count
+            data,
+            best_rows_permutation,
+            best_cols_permutation,
+            row_indices,
+            col_indices,
+            rows_count,
+            cols_count,
         ):  # figure out cleaner way to have it inherit scope
             rows_permutation = best_rows_permutation
             cols_permutation = best_cols_permutation
@@ -291,7 +326,13 @@ def slanted_orders(
             return best_rows_permutation, best_cols_permutation
 
         best_rows_permutation, best_cols_permutation = reorder_phase(
-            data, best_rows_permutation, best_cols_permutation, row_indices, col_indices, rows_count, cols_count
+            data,
+            best_rows_permutation,
+            best_cols_permutation,
+            row_indices,
+            col_indices,
+            rows_count,
+            cols_count,
         )
 
     return {"rows": best_rows_permutation, "cols": best_cols_permutation}
@@ -369,7 +410,7 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
     **X_umap** : `adata.obsm` field
         UMAP coordinates of data.
     """
-    
+
     if adata.X.shape[1] > 6000:
         bool_features = calc_highly_variable_genes(adata.X)
         X = adata.X[:, bool_features]
@@ -377,7 +418,9 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
         X = adata.X
     X_pca = np.array(calc_pca(X))
     ### FUNCTIONALITY FOR INITIAL POSITIONS WILL BE ADDED
-    res = umap.UMAP(n_components=2, n_neighbors=n_neighbors, metric=metric, **kwargs).fit_transform(X_pca)
+    res = umap.UMAP(
+        n_components=2, n_neighbors=n_neighbors, metric=metric, **kwargs
+    ).fit_transform(X_pca)
     if return_layout:
         return res
     else:
@@ -385,7 +428,13 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
 
 
 def plot_umap(
-    adata, features=None, cat_palette="tab20", cont_palette="viridis_r", show=True, output_path=None, **kwargs
+    adata,
+    features=None,
+    cat_palette="tab20",
+    cont_palette="viridis_r",
+    show=True,
+    output_path=None,
+    **kwargs,
 ):
     """
     Make UMAP plot colored by hard clusters and confidence scores.
@@ -419,20 +468,29 @@ def plot_umap(
             try:
                 print("No umap found - checking for existing umap layout file...")
                 adata.obsm["X_umap"] = np.array(
-                    pd.read_csv(os.path.join(("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"))
+                    pd.read_csv(
+                        os.path.join(
+                            ("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"
+                        )
+                    )
                 )
             except Exception as e:
                 print(e)
                 print("No umap found - running umap...")
                 run_umap(adata)
-                pd.DataFrame(adata.obsm['X_umap']).to_csv(os.path.join(("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"), index=None)
+                pd.DataFrame(adata.obsm["X_umap"]).to_csv(
+                    os.path.join(
+                        ("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"
+                    ),
+                    index=None,
+                )
         else:
             print("No umap found - running umap...")
             run_umap(adata)
     # For now specifying plot_features is not available, needs troubleshooting
     features_to_plot = ["hard_clusters", "uncertainty_score"]
     ("Done umap, generating figures...")
-    plt.rcParams['figure.figsize'] = [10, 8]
+    plt.rcParams["figure.figsize"] = [10, 8]
     if output_path is not None:
         try:
             # sc.plt.umap(adata, color=features_to_plot, s=50, frameon=False, ncols=3, palette='tab20', save=output_path)
@@ -459,6 +517,14 @@ def plot_umap(
         except Exception as e:
             print(e)
     else:
-        _umap_utils.embedding(adata, color=features_to_plot, frameon=False, ncols=2, palette=cat_palette, cmap="viridis_r", **kwargs)
+        _umap_utils.embedding(
+            adata,
+            color=features_to_plot,
+            frameon=False,
+            ncols=2,
+            palette=cat_palette,
+            cmap="viridis_r",
+            **kwargs,
+        )
         # palette=cluster_color_dict, edgecolor='none', size = 15, vmax=200)
         plt.show()

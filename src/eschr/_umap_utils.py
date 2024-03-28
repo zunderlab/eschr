@@ -12,8 +12,6 @@ from matplotlib.cm import get_cmap
 from matplotlib.colors import is_color_like, to_hex
 from pandas.api.types import is_categorical_dtype
 
-from . import _palettes
-
 sys.setrecursionlimit(1000000)
 
 # flake8: noqa: C411
@@ -214,8 +212,8 @@ def embedding(
     # Most of the code is for the case when multiple plots are required
 
     # First set figsize based on number of subplots
-    #plt.rcParams["figure.figsize"] = [3 * ncols, (3 * (len(color) / ncols))]
-    plt.rcParams["figure.figsize"] = [3,3]
+    # plt.rcParams["figure.figsize"] = [3 * ncols, (3 * (len(color) / ncols))]
+    plt.rcParams["figure.figsize"] = [3, 3]
 
     if wspace is None:
         #  try to set a wspace that is not too large or too small given the
@@ -224,10 +222,15 @@ def embedding(
 
     color, dimensions = _broadcast_args(color, dimensions)
 
-    if (not isinstance(color, str) and isinstance(color, cabc.Sequence) and len(color) > 1) or len(dimensions) > 1:
+    if (
+        not isinstance(color, str)
+        and isinstance(color, cabc.Sequence)
+        and len(color) > 1
+    ) or len(dimensions) > 1:
         if ax is not None:
             raise ValueError(
-                "Cannot specify `ax` when plotting multiple panels " "(each for a given value of 'color')."
+                "Cannot specify `ax` when plotting multiple panels "
+                "(each for a given value of 'color')."
             )
 
         # each plot needs to be its own panel
@@ -345,7 +348,9 @@ def embedding(
             continue
 
         if legend_fontoutline is not None:
-            path_effect = [patheffects.withStroke(linewidth=legend_fontoutline, foreground="w")]
+            path_effect = [
+                patheffects.withStroke(linewidth=legend_fontoutline, foreground="w")
+            ]
         else:
             path_effect = None
 
@@ -365,7 +370,9 @@ def embedding(
                 multi_panel=bool(grid),
             )
         elif colorbar_loc is not None:
-            plt.colorbar(cax, ax=ax, pad=0.01, fraction=0.08, aspect=30, location=colorbar_loc)
+            plt.colorbar(
+                cax, ax=ax, pad=0.01, fraction=0.08, aspect=30, location=colorbar_loc
+            )
     axs = axs if grid else ax
     # print(show)
     if show is True:
@@ -376,7 +383,9 @@ def embedding(
         return fig
 
 
-def _get_color_source_vector(adata, value_to_plot, use_raw=False, gene_symbols=None, layer=None, groups=None):
+def _get_color_source_vector(
+    adata, value_to_plot, use_raw=False, gene_symbols=None, layer=None, groups=None
+):
     """Get array from adata that colors will be based on."""
     if value_to_plot is None:
         # Points will be plotted with `na_color`. Ideally this would work
@@ -384,7 +393,11 @@ def _get_color_source_vector(adata, value_to_plot, use_raw=False, gene_symbols=N
         # _color_vector handles this.
         # https://github.com/matplotlib/matplotlib/issues/18294
         return np.broadcast_to(np.nan, adata.n_obs)
-    if gene_symbols is not None and value_to_plot not in adata.obs.columns and value_to_plot not in adata.var_names:
+    if (
+        gene_symbols is not None
+        and value_to_plot not in adata.obs.columns
+        and value_to_plot not in adata.var_names
+    ):
         # We should probably just make an index for this, and share it over runs
         value_to_plot = adata.var.index[adata.var[gene_symbols] == value_to_plot][
             0
@@ -448,7 +461,10 @@ def _set_colors_for_categorical_obs(adata, value_to_plot, palette):
                     if color in additional_colors:
                         color = additional_colors[color]
                     else:
-                        raise ValueError("The following color value of the given palette " f"is not valid: {color}")
+                        raise ValueError(
+                            "The following color value of the given palette "
+                            f"is not valid: {color}"
+                        )
                 _color_list.append(color)
 
             palette = cycler(color=_color_list)
@@ -546,7 +562,9 @@ def _get_palette(adata, values_key: str, palette=None):
     values = pd.Categorical(adata.obs[values_key])
     if palette:
         _set_colors_for_categorical_obs(adata, values_key, palette)
-    elif color_key not in adata.uns or len(adata.uns[color_key]) < len(values.categories):
+    elif color_key not in adata.uns or len(adata.uns[color_key]) < len(
+        values.categories
+    ):
         #  set a default palette in case that no colors or few colors are found
         _set_default_colors_for_categorical_obs(adata, values_key)
     else:
@@ -560,7 +578,9 @@ def _broadcast_args(*args):
     longest = max(lens)
     if not (set(lens) == {1, longest} or set(lens) == {longest}):
         raise ValueError(f"Could not broadast together arguments with shapes: {lens}.")
-    return list([[arg[0] for _ in range(longest)] if len(arg) == 1 else arg for arg in args])
+    return list(
+        [[arg[0] for _ in range(longest)] if len(arg) == 1 else arg for arg in args]
+    )
 
 
 def _add_categorical_legend(
@@ -579,7 +599,9 @@ def _add_categorical_legend(
     """Add a legend to the passed Axes."""
     if na_in_legend and pd.isnull(color_source_vector).any():
         if "NA" in color_source_vector:
-            raise NotImplementedError("No fallback for null labels has been defined if NA already in categories.")
+            raise NotImplementedError(
+                "No fallback for null labels has been defined if NA already in categories."
+            )
         color_source_vector = color_source_vector.add_categories("NA").fillna("NA")
         palette = palette.copy()
         palette["NA"] = na_color
