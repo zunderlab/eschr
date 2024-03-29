@@ -103,7 +103,7 @@ Now you can run code adapted from the example run scripts above or copy and past
 3. Next run `python -m ipykernel install --user --name=<env_name>`.
 4. You can then then close the environment by running `conda deactivate`
 5. Open Anaconda Navigator and click on the icon for Jupyter Notebooks (this should open an instance of a command line interface, and then open a tab in your default browser to a page containing your PC's file structure)
-6. Navigate to where you saved the downloaded tutorial notebook (instructions for downloading tutorial can be found in `Tutorial` section below) and click to open that notebook, or start a fresh notebook if you prefer to work off of the `Quick Start` instructions.
+6. Navigate to where you saved the downloaded tutorial notebook (tutorial notebook can be found in `/docs/notebooks/paul15.ipynb`) and click to open that notebook, or start a fresh notebook if you prefer to work off of the `Quick Start` instructions with your own data.
 7. Upon opening the notebook, you may be prompted to select a kernel, or if not you can click on the `Kernel` menu from the top navigation bar, and then `Change kernel`. The name of the environment you created should show up as an option for the kernel - select that as the kernel for your notebook.
 8. You should now be ready to run! Just click your way through the notebook. You can change output paths for the visualizations when you get to those cells.
 
