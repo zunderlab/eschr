@@ -10,7 +10,7 @@ ESCHR: A hyperparameter-randomized ensemble approach for robust clustering acros
 
 ## Overview of Algorithm:
 
-![alt text](figure_1_schematic_v4.png)
+![figure](figure_1_schematic_v4.png)
 
 ## Quick Start
 You can try out the method without needing to install ESCHR locally with this [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb) 
