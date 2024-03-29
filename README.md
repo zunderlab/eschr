@@ -134,7 +134,9 @@ If you found a bug, please use the [issue tracker][issue-tracker].
 
 ## Citation
 
-> t.b.a
+    A hyperparameter-randomized ensemble approach for robust clustering across diverse datasets
+    Sarah M. Goggin, Eli R. Zunder
+    bioRxiv 2023.12.18.571953; doi: https://doi.org/10.1101/2023.12.18.571953
 
 [issue-tracker]: https://github.com/zunderlab/eschr/issues
 [changelog]: https://eschr.readthedocs.io/latest/changelog.html
