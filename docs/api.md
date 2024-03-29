@@ -20,7 +20,7 @@
 ## Plotting
 
 ```{eval-rst}
-.. automodule:: eschr.smm_heatmap
+.. automodule:: eschr.plotting
    :members: make_smm_heatmap
    :undoc-members:
    :private-members:
@@ -28,7 +28,7 @@
 ```
 
 ```{eval-rst}
-.. automodule:: eschr.umap
+.. automodule:: eschr.plotting
    :members: plot_umap
    :undoc-members:
    :private-members:
