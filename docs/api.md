@@ -13,7 +13,6 @@
 ## Consensus Cluster
 
 ```{eval-rst}
-.. module:: eschr.tl
 .. automodule:: eschr.tl
    :members:
    :show-inheritance:
