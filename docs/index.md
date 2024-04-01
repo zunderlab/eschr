@@ -1,3 +1,12 @@
+```{eval-rst}
+ESCHR: A hyperparameter-randomized ensemble approach for robust clustering across diverse datasets
+====================================================
+
+.. image:: ../../figure.png
+   :alt: Explanatory figure
+    
+```
+
 ```{include} ../README.md
 
 ```
