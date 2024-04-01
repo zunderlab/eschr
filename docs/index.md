@@ -1,19 +1,14 @@
 ```{eval-rst}
-ESCHR: A hyperparameter-randomized ensemble approach for robust clustering across diverse datasets
-====================================================
-
-.. image:: ../../figure.png
-   :alt: Explanatory figure
+.. toctree::
+   :maxdepth: 2
+ 
+   readme
     
-```
-
-```{include} ../README.md
-
 ```
 
 ```{toctree}
 :hidden: true
-:maxdepth: 1
+:maxdepth: 3
 
 api.md
 changelog.md
