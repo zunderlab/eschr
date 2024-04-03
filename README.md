@@ -14,7 +14,7 @@ ESCHR: A hyperparameter-randomized ensemble approach for robust clustering acros
 
 ## Quick Start
 
-You can try out the method without needing to install ESCHR locally with this [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb)
+This [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb) provides a walkthrough of ESCHR analysis using an example scRNA-seq dataset. If you launch the notebook in Google Colab, you will not need to install ESCHR locally.
 
 ## Installation
 
@@ -33,7 +33,7 @@ Python installed, we recommend installing [Mambaforge](https://github.com/conda-
 
 ## Getting started
 
-For full documentation, please refer to the [documentation][link-docs] for further details.
+Please refer to the full [documentation][link-docs] for further details.
 
 ### Most basic example run script:
 If you want to try ESCHR on your own data, you can start with this basic example script. This assumes that you have a preprocessed .csv file with features as columns and cells or other data points as rows.
