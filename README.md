@@ -36,6 +36,7 @@ Python installed, we recommend installing [Mambaforge](https://github.com/conda-
 For full documentation, please refer to the [documentation][link-docs] for further details.
 
 ### Most basic example run script:
+If you want to try ESCHR on your own data, you can start with this basic example script. This assumes that you have a preprocessed .csv file with features as columns and cells or other data points as rows.
 
 ```
 import eschr as es
