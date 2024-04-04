@@ -21,15 +21,7 @@
 
 ```{eval-rst}
 .. automodule:: eschr.plotting
-   :members: make_smm_heatmap
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
-```
-
-```{eval-rst}
-.. automodule:: eschr.plotting
-   :members: plot_umap
+   :members: 
    :undoc-members:
    :private-members:
    :show-inheritance:
