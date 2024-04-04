@@ -10,7 +10,6 @@ Import eschr as::
 
    import eschr as es
 
-Some convenient preprocessing functions translated from pagoda2 have been included:
 
 Make zarr files
 ---------------
