@@ -24,7 +24,7 @@ dependencies = [
     "igraph==0.10.4",
     "leidenalg",
     "nmslib==2.1.1",
-    "numpy",
+    "numpy>=1.22",
     "pandas==1.5.3",
     "zarr",
     "scanpy",
