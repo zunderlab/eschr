@@ -40,6 +40,7 @@ If you want to try ESCHR on your own data, you can start with this basic example
 ```
 import eschr as es
 import pandas as pd
+import anndata
 
 # Read in data from a csv file.
 # The method expects features as columns
@@ -53,7 +54,9 @@ data = pd.read_csv(data_filepath, index_col=0)#.T
 # Make AnnData object with your data
 adata = anndata.AnnData(X=data)
 
-# Optionally specify the path for creating the zarr store that will be used for interacting with your data. Otherwise it will be created in the workign directory.
+# Optionally specify the path for creating the zarr store that
+# will be used for interacting with your data. Otherwise it will
+# be created in the working directory.
 zarr_loc = "/path/to/your/data.zarr"
 
 # Now you can run the method with your prepped data!
