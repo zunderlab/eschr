@@ -50,38 +50,26 @@ import pandas as pd
 data_filepath = "/path/to/your/data.csv"
 data = pd.read_csv(data_filepath, index_col=0)#.T
 
-# Create the zarr store that will be used for interacting with your data
-zarr_loc = "/path/to/your/data.zarr"
-es.make_zarr(data=data, zarr_loc=zarr_loc)
+# Make AnnData object with your data
+adata = anndata.AnnData(X=data)
 
-# Initialize a ConsensusCluster instance
+# Optionally specify the path for creating the zarr store that will be used for interacting with your data. Otherwise it will be created in the workign directory.
+zarr_loc = "/path/to/your/data.zarr"
+
+# Now you can run the method with your prepped data!
 # (add any optional hyperparameter specifications,
 # but bear in mind the method was designed to work for
-# diverse datasets with the default settings.
-cc_obj = es.ConsensusCluster(zarr_loc=zarr_loc)
-
-# Now you can run the method with your prepped data:
-cc_obj.consensus_cluster()
-
-# For most built-in visualizations and/or
-# for compatibility with scverse suite of tools,
-# you should next generate an AnnData object containing all outputs.
-# There is a ConsensusCluster class method for doing this!
-# This will add the AnnData object as an attribute to the
-# ConsensusCluster object.
-cc_obj.make_adata(
-    feature_names=data.columns.values,
-    sample_names=data.index.values
-)
-
-# To extract anndata object for downstream applications, run the following:
-adata = cc_obj.adata
+# diverse datasets with the default settings.)
+adata = es.consensus_cluster(
+            adata=adata,
+            zarr_loc=zarr_loc
+        )
 
 # Plot soft membership matrix heatmap visualization
-es.make_smm_heatmap(cc_obj, output_path="/where/to/save/figure.png")
+es.make_smm_heatmap(adata, output_path="/where/to/save/figure.png")
 
 # Plot umap visualization
-es.plot_umap(cc_obj, output_path="/where/to/save/figure.png")
+es.plot_umap(adata, output_path="/where/to/save/figure.png")
 ```
 
 ### Setting up to run via command line:
