@@ -628,7 +628,6 @@ def consensus_cluster(
                         reduction=reduction,
                         metric=metric,
                         ensemble_size=ensemble_size,
-                        auto_stop=auto_stop,
                         k_range=k_range,
                         la_res_range=la_res_range,
                         nprocs=nprocs)
