@@ -79,10 +79,10 @@ cc_obj.make_adata(
 adata = cc_obj.adata
 
 # Plot soft membership matrix heatmap visualization
-es.make_smm_heatmap(cc_obj, output_path="/where/to/save/figure.png")
+es.make_smm_heatmap(adata, output_path="/where/to/save/figure.png")
 
 # Plot umap visualization
-es.plot_umap(cc_obj, output_path="/where/to/save/figure.png")
+es.plot_umap(adata, output_path="/where/to/save/figure.png")
 ```
 
 ### Setting up to run via command line:
