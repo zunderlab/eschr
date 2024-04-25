@@ -1,6 +1,7 @@
 # ESCHR
 
 [![Documentation][badge-docs]][link-docs]
+[![codecov](https://codecov.io/gh/zunderlab/eschr/branch/main/graph/badge.svg)](https://codecov.io/gh/zunderlab/eschr)
 
 [badge-tests]: https://img.shields.io/github/actions/workflow/status/zunderlab/eschr/test.yaml?branch=main
 [link-tests]: https://github.com/zunderlab/eschr/actions/workflows/test.yml
