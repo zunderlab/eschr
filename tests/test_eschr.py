@@ -6,7 +6,11 @@ import anndata
 import numpy as np
 import pandas as pd
 
-
+# to run test_eschr.py on your local machine, please set up as follows:
+# - install extra package into your eschr environment: pytest, pytest-cov
+# - install editable version of eschr package (pip install -e .)
+#      - check version (conda list eschr), make sure it is the development version
+# - make sure the test data are ready under "data" folder
 
 def test_package_has_version():
     eschr.__version__
@@ -22,6 +26,10 @@ def adata():
     adata = anndata.AnnData(X=data)
     return adata
 
+@pytest.fixture
+def zarr_loc():
+    return "data/test_data.zarr"
+    
 # TEST TOOL FUNCTIONS
 
 
