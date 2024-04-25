@@ -297,14 +297,10 @@ def run_base_clustering(args_in):
         
         # Get hyperparameter settings for this ensemble member
         iter_k, la_res, metric = get_hyperparameters(iter_k_range, hyperparams_ls[1], hyperparams_ls[2])
-        ## Log transform features if it is scRNAseq that has not yet been transformed
-        ## REMOVE FOR PUBLIC METHOD!!!
+        
+        ## internal heuristic for if it scrna seq and not log transformed
         if data.shape[1] > 8000:
-            # internal heuristic for if it scrna seq, def needs to change (just require data already be log transformed)
-            # log2 transform, if it is not already! (can check this my looking at max value in array)
             if np.max(data) > 20:
-                # data = np.log1p(data)
-                # print("log transformed, max=" + str(np.max(data)))
                 print("Data likely needs to be preprocessed, results may be suboptimal")
 
         ## Data subspace feature extraction
