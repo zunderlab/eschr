@@ -2,6 +2,11 @@ import pytest
 
 import eschr
 
+import anndata
+import numpy as np
+import pandas as pd
+
+
 
 def test_package_has_version():
     eschr.__version__
