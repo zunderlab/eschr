@@ -630,7 +630,7 @@ def consensus_cluster(
     
     # Obtain consensus from ensemble
     hard_clusters, soft_membership_matrix, all_clusterings_df = consensus(
-        n=bipartite.shape[0], bg=bipartite, nprocs=nprocs, out_dir=out_dir #n=per_iter_clust_assigns.shape[0]
+        n=bipartite.shape[0], bg=bipartite, nprocs=nprocs
     )
     
     print("Final Clustering:")
