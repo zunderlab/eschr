@@ -474,7 +474,7 @@ def ensemble(zarr_loc,
     out = parmap(run_base_clustering, args, nprocs=nprocs)
     
     try:
-        clust_out = hstack([x[0] for x in out]) 
+        clust_out = hstack(out) #[x[0] for x in out] 
     except Exception:
         print("consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])")
 
