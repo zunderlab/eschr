@@ -13,7 +13,7 @@ import pandas as pd
 # - make sure the test data are ready under "data" folder
 
 def test_package_has_version():
-    eschr.__version__
+    es.__version__
 
 
 @pytest.mark.skip(reason="This decorator should be removed when test passes.")
@@ -52,7 +52,7 @@ def test_min_max_scaler_default():
     data = [1, 2, 3, 4, 5]
     
     # Test default min and max
-    scaled = es.pl.min_max_scaler(data)
+    scaled = es.pl.plotting.min_max_scaler(data)
     assert np.isclose(scaled[0], 0)
     assert np.isclose(scaled[-1], 1)
 
@@ -60,32 +60,32 @@ def test_slanted_orders():
     data = [[1, 2], [3, 4]]
     
     # Test default parameters
-    row_order, col_order = es.pl.slanted_orders(data)
+    row_order, col_order = es.pl.plotting.slanted_orders(data)
     assert row_order.tolist() == [1, 0]
     assert col_order.tolist() == [1, 0]
 
     # Test order rows only
-    row_order, col_order = es.pl.slanted_orders(data, order_cols=False)
+    row_order, col_order = es.pl.plotting.slanted_orders(data, order_cols=False)
     assert row_order.tolist() == [1, 0]
     assert col_order.tolist() == [0, 1]
 
     # Test order cols only
-    row_order, col_order = es.pl.slanted_orders(data, order_rows=False) 
+    row_order, col_order = es.pl.plotting.slanted_orders(data, order_rows=False) 
     assert row_order.tolist() == [0, 1]
     assert col_order.tolist() == [1, 0]
 
     # Test no ordering
-    row_order, col_order = es.pl.slanted_orders(data, order_rows=False, order_cols=False)
+    row_order, col_order = es.pl.plotting.slanted_orders(data, order_rows=False, order_cols=False)
     assert row_order.tolist() == [0, 1]
     assert col_order.tolist() == [0, 1]
 
 def test_run_umap_default(adata):
     # Test default return 
-    plotting.run_umap(adata)
+    es.pl.plotting.run_umap(adata)
     assert 'X_umap' in adata.obsm
 
 def test_run_umap_return_layout(adata):
     # Test return layout
-    embedding = plotting.run_umap(adata, return_layout=True)
+    embedding = es.pl.plotting.run_umap(adata, return_layout=True)
     assert isinstance(embedding, np.ndarray)
     assert embedding.shape[1] == 2
