@@ -49,7 +49,7 @@ def test_smm_heatmap_invalid_output_path(adata):
         es.pl.smm_heatmap(adata, output_path='invalid/path')
 
 def test_min_max_scaler_default():
-    data = [1, 2, 3, 4, 5]
+    data = np.array([1, 2, 3, 4, 5])
     
     # Test default min and max
     scaled = es.pl.plotting.min_max_scaler(data)
