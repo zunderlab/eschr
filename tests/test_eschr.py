@@ -62,27 +62,29 @@ def test_min_max_scaler_default():
     assert np.isclose(scaled[-1], 1)
 
 def test_slanted_orders():
-    data = np.array([[1, 2], [3, 4]])
+    data = np.array([[2,0,0], 
+                 [0,1,2],
+                [1,2,1]])
     
     # Test default parameters
     order_dict = es.pl.plotting.slanted_orders(data)
-    assert order_dict['rows'].tolist() == [1, 0]
-    assert order_dict['cols'].tolist() == [1, 0]
+    assert order_dict['rows'].tolist() == [2,1,0]
+    assert order_dict['cols'].tolist() == [1,2,0]
 
     # Test order rows only
     order_dict = es.pl.plotting.slanted_orders(data, order_cols=False)
-    assert order_dict['rows'].tolist() == [1, 0]
-    assert order_dict['cols'].tolist() == [0, 1]
+    assert order_dict['rows'].tolist() == [1,2,0]
+    assert order_dict['cols'].tolist() == [0,1,2]
 
     # Test order cols only
     order_dict = es.pl.plotting.slanted_orders(data, order_rows=False) 
-    assert order_dict['rows'].tolist() == [0, 1]
-    assert order_dict['cols'].tolist() == [1, 0]
+    assert order_dict['rows'].tolist() == [0,1,2]
+    assert order_dict['cols'].tolist() == [0,2,1]
 
     # Test no ordering
     order_dict = es.pl.plotting.slanted_orders(data, order_rows=False, order_cols=False)
-    assert order_dict['rows'].tolist() == [0, 1]
-    assert order_dict['cols'].tolist() == [0, 1]
+    assert order_dict['rows'].tolist() == [0,1,2]
+    assert order_dict['cols'].tolist() == [0,1,2]
 
 def test_run_umap_default(adata):
     # Test default return 
