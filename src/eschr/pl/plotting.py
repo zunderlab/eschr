@@ -48,8 +48,7 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         Path specifying where to save the plot. If none, plot is not saved.
     """
     # Prep soft membership matrix data for plotting
-    hard_clust = np.unique(adata.obs["hard_clusters"])
-    adata.obsm["soft_membership_matrix"] = adata.obsm["soft_membership_matrix"][:, hard_clust]
+    adata.obsm["soft_membership_matrix"] = adata.obsm["soft_membership_matrix"]
     row_order = hierarchy.dendrogram(
         hierarchy.linkage(pdist(adata.obsm["soft_membership_matrix"]), method="average"),
         no_plot=True,
