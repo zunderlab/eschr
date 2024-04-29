@@ -41,17 +41,17 @@ def zarr_loc():
 # TEST PLOTTING FUNCTIONS
 def test_smm_heatmap_default(adata_with_results):
     # Test with default parameters
-    es.pl.smm_heatmap(adata)
+    es.pl.smm_heatmap(adata_with_results)
 
 def test_smm_heatmap_custom(adata_with_results):
     # Test with custom parameters
-    es.pl.smm_heatmap(adata, smm_cmap='viridis', feat_cmap='magma', 
+    es.pl.smm_heatmap(adata_with_results, smm_cmap='viridis', feat_cmap='magma', 
                       show=False, output_path='heatmap.png')
 
 def test_smm_heatmap_invalid_output_path(adata_with_results):
     # Test exception with invalid output path
     with pytest.raises(Exception):
-        es.pl.smm_heatmap(adata, output_path='invalid/path')
+        es.pl.smm_heatmap(adata_with_results, output_path='invalid/path')
 
 def test_min_max_scaler_default():
     data = np.array([1, 2, 3, 4, 5])
