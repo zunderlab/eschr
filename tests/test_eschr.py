@@ -27,6 +27,11 @@ def adata():
     return adata
 
 @pytest.fixture
+def adata_with_results():
+    adata = anndata.read_h5ad("data/test_adata_with_eschr_results.h5ad")
+    return adata
+    
+@pytest.fixture
 def zarr_loc():
     return "data/test_data.zarr"
     
@@ -34,16 +39,16 @@ def zarr_loc():
 
 
 # TEST PLOTTING FUNCTIONS
-def test_smm_heatmap_default(adata):
+def test_smm_heatmap_default(adata_with_results):
     # Test with default parameters
     es.pl.smm_heatmap(adata)
 
-def test_smm_heatmap_custom(adata):
+def test_smm_heatmap_custom(adata_with_results):
     # Test with custom parameters
     es.pl.smm_heatmap(adata, smm_cmap='viridis', feat_cmap='magma', 
                       show=False, output_path='heatmap.png')
 
-def test_smm_heatmap_invalid_output_path(adata):
+def test_smm_heatmap_invalid_output_path(adata_with_results):
     # Test exception with invalid output path
     with pytest.raises(Exception):
         es.pl.smm_heatmap(adata, output_path='invalid/path')
