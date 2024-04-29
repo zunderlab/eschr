@@ -64,16 +64,16 @@ zarr_loc = "/path/to/your/data.zarr"
 # (add any optional hyperparameter specifications,
 # but bear in mind the method was designed to work for
 # diverse datasets with the default settings.)
-adata = es.consensus_cluster(
+adata = es.tl.consensus_cluster(
             adata=adata,
             zarr_loc=zarr_loc
         )
 
 # Plot soft membership matrix heatmap visualization
-es.make_smm_heatmap(adata, output_path="/where/to/save/figure.png")
+es.pl.smm_heatmap(adata, output_path="/where/to/save/figure.png")
 
 # Plot umap visualization
-es.plot_umap(adata, output_path="/where/to/save/figure.png")
+es.pl.umap_heatmap(adata, output_path="/where/to/save/figure.png")
 ```
 
 ### Setting up to run via command line:
