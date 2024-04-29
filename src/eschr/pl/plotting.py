@@ -384,7 +384,7 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
         adata.obsm["X_umap"] = res
 
 
-def umap(
+def umap_heatmap(
     adata, features=None, cat_palette="tab20", cont_palette="viridis_r", show=True, output_path=None, **kwargs
 ):
     """
