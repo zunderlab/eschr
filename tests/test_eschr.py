@@ -57,7 +57,7 @@ def test_min_max_scaler_default():
     assert np.isclose(scaled[-1], 1)
 
 def test_slanted_orders():
-    data = [[1, 2], [3, 4]]
+    data = np.array([[1, 2], [3, 4]])
     
     # Test default parameters
     row_order, col_order = es.pl.plotting.slanted_orders(data)
