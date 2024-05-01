@@ -2,6 +2,8 @@ import pytest
 
 import eschr as es
 
+import os
+import zarr
 import anndata
 import numpy as np
 import pandas as pd
