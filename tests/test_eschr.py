@@ -36,7 +36,24 @@ def zarr_loc():
     return "data/test_data.zarr"
     
 # TEST TOOL FUNCTIONS
+def test_make_zarr_default(adata):
+    es.tl.consensus_cluster.make_zarr(adata, None)
+    assert os.path.exists("data_store.zarr")
+    os.remove("data_store.zarr")
 
+def test_make_zarr_custom_path(adata, zarr_loc):
+    es.tl.consensus_cluster.make_zarr(adata, zarr_loc)
+    assert os.path.exists(zarr_loc)
+    os.remove(zarr_loc)
+
+def test_make_zarr_content(adata, zarr_loc):
+    es.tl.consensus_cluster.make_zarr(adata, zarr_loc)
+    z = zarr.open(zarr_loc)
+    X = z['X']
+    assert np.array_equal(X['row'][:], adata.X.row)
+    assert np.array_equal(X['col'][:], adata.X.col)
+    assert np.array_equal(X['data'][:], adata.X.data)
+    os.remove(zarr_loc)
 
 # TEST PLOTTING FUNCTIONS
 def test_smm_heatmap_default(adata_with_results):
