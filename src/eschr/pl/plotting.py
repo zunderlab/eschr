@@ -143,7 +143,7 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         if show:
             plt.show()
         else:
-            plt.close(heatmap)
+            plt.close(fig)
     else:
         plt.show()
 
