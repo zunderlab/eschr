@@ -1,1 +1,1 @@
-from .consensus_cluster import consensus_cluster
+from .clustering import consensus_cluster
