@@ -139,14 +139,11 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         )
 
     if output_path is not None:
-        if os.path.isfile(output_path) == False:
-            raise Exception("provided output_path is not a valid file path")
+        plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
+        if show:
+            plt.show()
         else:
-            plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
-            if show:
-                plt.show()
-            else:
-                plt.close(heatmap)
+            plt.close(heatmap)
     else:
         plt.show()
 
