@@ -48,12 +48,20 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         Path specifying where to save the plot. If none, plot is not saved.
     """
     # Prep soft membership matrix data for plotting
-    adata.obsm["soft_membership_matrix"] = adata.obsm["soft_membership_matrix"]
-    row_order = hierarchy.dendrogram(
-        hierarchy.linkage(pdist(adata.obsm["soft_membership_matrix"]), method="average"),
-        no_plot=True,
-        color_threshold=-np.inf,
-    )["leaves"]
+    # Order rows by hclust or if too large by multidimensional sort
+    if adata.obsm["soft_membership_matrix"].shape[0] <= 50000:
+        row_order = hierarchy.dendrogram(
+            hierarchy.linkage(pdist(adata.obsm["soft_membership_matrix"]), method="average"),
+            no_plot=True,
+            color_threshold=-np.inf,
+        )["leaves"]
+    else:
+        smm_with_index = np.insert(adata.obsm["soft_membership_matrix"], 0, list(range(adata.obsm["soft_membership_matrix"].shape[0])), axis=1)
+        # Sort the list using sorted() function
+        # and lambda function for multiple attributes
+        sorted_list = sorted(smm_with_index.tolist(), key = lambda x: [x[i] for i in range(1,adata.obsm["soft_membership_matrix"].shape[1])])
+        row_order = np.array(sorted_list)[:,0].astype(int).tolist()
+    # Re-order clusters to fall along the diagonal for easier visual interpretation
     row_col_order_dict = slanted_orders(
         adata.obsm["soft_membership_matrix"][row_order, :],
         order_rows=False,
@@ -64,7 +72,7 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
     smm_reordered = adata.obsm["soft_membership_matrix"][row_order, :][row_col_order_dict["rows"].tolist(), :]
     smm_reordered = smm_reordered[:, row_col_order_dict["cols"].tolist()]
 
-    # For now plot_features is not enabled because it needs soem troubleshooting
+    # For now plot_features is not enabled because it needs some troubleshooting
     plot_features = False
     if plot_features:
         plt.rcParams["figure.figsize"] = [15, 5] #needs to adapt to number of features
@@ -131,15 +139,14 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         )
 
     if output_path is not None:
-        try:
+        if os.path.isfile(output_path) == False:
+            raise Exception("provided output_path is not a valid file path")
+        else:
             plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
             if show:
                 plt.show()
             else:
-                plt.close(annotations_heatmap)
-        except Exception as e:
-            print(e)
-            print("You must provide an directory path to output_dir if save_plot is True")
+                plt.close(heatmap)
     else:
         plt.show()
 
