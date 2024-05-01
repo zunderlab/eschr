@@ -59,7 +59,7 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         smm_with_index = np.insert(adata.obsm["soft_membership_matrix"], 0, list(range(adata.obsm["soft_membership_matrix"].shape[0])), axis=1)
         # Sort the list using sorted() function
         # and lambda function for multiple attributes
-        sorted_list = sorted(smm_with_index.tolist(), key = lambda x: [x[i] for i in range(1,adata.obsm["soft_membership_matrix"].shape[1])])
+        sorted_list = sorted(smm_with_index.tolist(), key = lambda x: [x[i] for i in range(1,smm_with_index.shape[1])])
         row_order = np.array(sorted_list)[:,0].astype(int).tolist()
     # Re-order clusters to fall along the diagonal for easier visual interpretation
     row_col_order_dict = slanted_orders(
