@@ -7,6 +7,7 @@ import zarr
 import anndata
 import numpy as np
 import pandas as pd
+from scipy.sparse import coo_matrix
 
 # to run test_eschr.py on your local machine, please set up as follows:
 # - install extra package into your eschr environment: pytest, pytest-cov
@@ -52,9 +53,10 @@ def test_make_zarr_content(adata, zarr_loc):
     es.tl.clustering.make_zarr(adata, zarr_loc)
     z = zarr.open(zarr_loc)
     X = z['X']
-    assert np.array_equal(X['row'][:], adata.X.row)
-    assert np.array_equal(X['col'][:], adata.X.col)
-    assert np.array_equal(X['data'][:], adata.X.data)
+    adata_X_coo = coo_matrix(adata.X)
+    assert np.array_equal(X['row'][:], adata_X_coo.row)
+    assert np.array_equal(X['col'][:], adata_X_coo.col)
+    assert np.allclose(X['data'][:], adata_X_coo.data) #allow for rounding differences
     os.remove(zarr_loc)
 
 # TEST PLOTTING FUNCTIONS
