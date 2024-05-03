@@ -42,12 +42,12 @@ def zarr_loc():
 def test_make_zarr_default(adata):
     es.tl.clustering.make_zarr(adata, None)
     assert os.path.exists("data_store.zarr")
-    os.remove("data_store.zarr")
+    os.rmdir("data_store.zarr")
 
 def test_make_zarr_custom_path(adata, zarr_loc):
     es.tl.clustering.make_zarr(adata, zarr_loc)
     assert os.path.exists(zarr_loc)
-    os.remove(zarr_loc)
+    os.rmdir(zarr_loc)
 
 def test_make_zarr_content(adata, zarr_loc):
     es.tl.clustering.make_zarr(adata, zarr_loc)
@@ -57,42 +57,42 @@ def test_make_zarr_content(adata, zarr_loc):
     assert np.array_equal(X['row'][:], adata_X_coo.row)
     assert np.array_equal(X['col'][:], adata_X_coo.col)
     assert np.allclose(X['data'][:], adata_X_coo.data) #allow for rounding differences
-    os.remove(zarr_loc)
+    os.rmdir(zarr_loc)
 
 def test_get_subsamp_size():
     # Test extreme small n
     n = 10
     subsample_size_10 = []
     for i in range(1000):
-        subsample_size_10.append(get_subsamp_size(n))
+        subsample_size_10.append(es.tl.clustering.get_subsamp_size(n))
     subsample_frac_10 = np.mean(subsample_size_10)/n
 
     # Test with small n
     n = 500
     subsample_size_500 = []
     for i in range(1000):
-        subsample_size_500.append(get_subsamp_size(n))
+        subsample_size_500.append(es.tl.clustering.get_subsamp_size(n))
     subsample_frac_500 = np.mean(subsample_size_500)/n
     
     # Test with medium n
     n = 50000 
     subsample_size_50k = []
     for i in range(1000):
-        subsample_size_50k.append(get_subsamp_size(n))
+        subsample_size_50k.append(es.tl.clustering.get_subsamp_size(n))
     subsample_frac_50k = np.mean(subsample_size_50k)/n
 
     # Test with large n
     n = 1000000
     subsample_size_1mil = []
     for i in range(1000):
-        subsample_size_1mil.append(get_subsamp_size(n))
+        subsample_size_1mil.append(es.tl.clustering.get_subsamp_size(n))
     subsample_frac_1mil = np.mean(subsample_size_1mil)/n
 
     # Test extreme large n
     n = 100000000
     subsample_size_100mil = []
     for i in range(1000):
-        subsample_size_100mil.append(get_subsamp_size(n))
+        subsample_size_100mil.append(es.tl.clustering.get_subsamp_size(n))
     subsample_frac_100mil = np.mean(subsample_size_100mil)/n
     
     assert subsample_size_10 > subsample_frac_500 and subsample_frac_500 < subsample_frac_50k and subsample_frac_50k < subsample_frac_1mil and np.abs(subsample_frac_1mil - subsample_frac_100mil) < 10
