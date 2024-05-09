@@ -97,8 +97,8 @@ def test_get_subsamp_size():
     subsample_frac_100mil = np.mean(subsample_size_100mil)/n
     
     assert subsample_frac_10 > subsample_frac_500 
-    assert subsample_frac_500 < subsample_frac_50k 
-    assert subsample_frac_50k < subsample_frac_1mil 
+    assert subsample_frac_500 > subsample_frac_50k 
+    assert subsample_frac_50k > subsample_frac_1mil 
     assert np.abs(subsample_frac_1mil - subsample_frac_100mil) < 10
 
 
