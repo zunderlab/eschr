@@ -3,6 +3,7 @@ import pytest
 import eschr as es
 
 import os
+import shutil
 import zarr
 import anndata
 import numpy as np
@@ -42,12 +43,12 @@ def zarr_loc():
 def test_make_zarr_default(adata):
     es.tl.clustering.make_zarr(adata, None)
     assert os.path.exists("data_store.zarr")
-    os.rmdir("data_store.zarr")
+    shutil.rmtree("data_store.zarr")
 
 def test_make_zarr_custom_path(adata, zarr_loc):
     es.tl.clustering.make_zarr(adata, zarr_loc)
     assert os.path.exists(zarr_loc)
-    os.rmdir(zarr_loc)
+    shutil.rmtree(zarr_loc)
 
 def test_make_zarr_content(adata, zarr_loc):
     es.tl.clustering.make_zarr(adata, zarr_loc)
@@ -57,7 +58,7 @@ def test_make_zarr_content(adata, zarr_loc):
     assert np.array_equal(X['row'][:], adata_X_coo.row)
     assert np.array_equal(X['col'][:], adata_X_coo.col)
     assert np.allclose(X['data'][:], adata_X_coo.data) #allow for rounding differences
-    os.rmdir(zarr_loc)
+    shutil.rmtree(zarr_loc)
 
 def test_get_subsamp_size():
     # Test extreme small n
