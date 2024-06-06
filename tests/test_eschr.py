@@ -140,7 +140,7 @@ def test_get_hyperparameters_random_seed():
 def test_run_pca_dim_reduction(X):
     X_pca = es.tl.clustering.run_pca_dim_reduction(X)
     assert X_pca.shape[1] < X.shape[1]
-    assert X_pca.shape[0] == X.shape[0]
+    assert X_pca.shape[1] == X.shape[0]
 
 # run_base_clustering
 def test_run_la_clustering(X):
@@ -160,7 +160,7 @@ def args_in(zarr_loc_static, hyperparams_ls):
 
 def test_run_base_clustering_valid_input(args_in):
     result = es.tl.clustering.run_base_clustering(args_in)
-    assert isinstance(result, sparse.coo_matrix)
+    assert isinstance(result, coo_matrix)
 
 # get_hard_soft_clusters
 
