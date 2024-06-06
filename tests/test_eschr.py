@@ -43,6 +43,11 @@ def adata_with_results():
 @pytest.fixture
 def zarr_loc():
     return "data/test_data.zarr"
+
+@pytest.fixture
+def zarr_loc_static(adata):
+    es.tl.clustering.make_zarr(adata, "data/test_data_static.zarr")
+    return "data/test_data_static.zarr"
     
 # TEST TOOL FUNCTIONS
 
@@ -150,8 +155,8 @@ def hyperparams_ls():
     return [None, (25, 175), None]
 
 @pytest.fixture
-def args_in(zarr_loc, hyperparams_ls):
-    return [zarr_loc, hyperparams_ls]
+def args_in(zarr_loc_static, hyperparams_ls):
+    return [zarr_loc_static, hyperparams_ls]
 
 def test_run_base_clustering_valid_input(args_in):
     result = es.tl.clustering.run_base_clustering(args_in)
