@@ -4,6 +4,7 @@ import eschr as es
 
 import os
 import shutil
+import random
 import zarr
 import anndata
 import numpy as np
@@ -40,6 +41,8 @@ def zarr_loc():
     return "data/test_data.zarr"
     
 # TEST TOOL FUNCTIONS
+
+# make_zarr
 def test_make_zarr_default(adata):
     es.tl.clustering.make_zarr(adata, None)
     assert os.path.exists("data_store.zarr")
@@ -60,6 +63,7 @@ def test_make_zarr_content(adata, zarr_loc):
     assert np.allclose(X['data'][:], adata_X_coo.data) #allow for rounding differences
     shutil.rmtree(zarr_loc)
 
+# get_subsamp_size
 def test_get_subsamp_size():
     # Test extreme small n
     n = 10
@@ -100,6 +104,37 @@ def test_get_subsamp_size():
     assert subsample_frac_500 > subsample_frac_50k 
     assert subsample_frac_50k > subsample_frac_1mil 
     assert np.abs(subsample_frac_1mil - subsample_frac_100mil) < 10
+
+# get_hyperparameters
+def test_get_hyperparameters(k_range, la_res_range):
+    k_range = (15, 150)
+    la_res_range = (25, 175)
+    k, la_res, metric = es.tl.clustering.get_hyperparameters(k_range, la_res_range)
+    assert k_range[0] <= k <= k_range[1]
+    assert la_res_range[0] <= la_res <= la_res_range[1]
+    assert metric in ["euclidean", "cosine"]
+
+def test_get_hyperparameters_random_seed():
+    random.seed(42)
+    k_range = (15, 150)
+    la_res_range = (25, 175)
+    k1, la_res1, metric1 = es.tl.clustering.get_hyperparameters(k_range, la_res_range)
+
+    random.seed(42)
+    k2, la_res2, metric2 = es.tl.clustering.get_hyperparameters(k_range, la_res_range)
+
+    assert k1 == k2
+    assert la_res1 == la_res2
+    assert metric1 == metric2
+
+# run_pca_dim_reduction
+
+
+# run_base_clustering
+
+# get_hard_soft_clusters
+
+# consensus_cluster_leiden
 
 
 # TEST PLOTTING FUNCTIONS
