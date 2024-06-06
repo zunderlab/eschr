@@ -26,6 +26,10 @@ def test_example():
     assert 1 == 0  # This test is designed to fail.
 
 @pytest.fixture
+def X():
+    return np.random.rand(100, 1000)
+
+@pytest.fixture
 def adata():
     data = pd.read_csv("data/test_data.csv", index_col=0).to_numpy()
     adata = anndata.AnnData(X=data)
@@ -128,7 +132,10 @@ def test_get_hyperparameters_random_seed():
     assert metric1 == metric2
 
 # run_pca_dim_reduction
-
+def test_run_pca_dim_reduction(X):
+    X_pca = consensus_cluster.run_pca_dim_reduction(X)
+    assert X_pca.shape[1] < X.shape[1]
+    assert X_pca.shape[0] == X.shape[0]
 
 # run_base_clustering
 
