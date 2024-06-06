@@ -147,7 +147,7 @@ def test_run_la_clustering(X):
     k = 15
     la_res = 1.0
     result = es.tl._leiden.run_la_clustering(X, k, la_res)
-    assert isinstance(result, np.array)
+    assert isinstance(result, np.ndarray)
     assert result.shape[0] == X.shape[0]
 
 @pytest.fixture
