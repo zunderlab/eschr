@@ -133,11 +133,29 @@ def test_get_hyperparameters_random_seed():
 
 # run_pca_dim_reduction
 def test_run_pca_dim_reduction(X):
-    X_pca = consensus_cluster.run_pca_dim_reduction(X)
+    X_pca = es.tl.clustering.run_pca_dim_reduction(X)
     assert X_pca.shape[1] < X.shape[1]
     assert X_pca.shape[0] == X.shape[0]
 
 # run_base_clustering
+def test_run_la_clustering(X):
+    k = 15
+    la_res = 1.0
+    result = es.tl._leiden.run_la_clustering(X, k, la_res)
+    assert isinstance(result, np.array)
+    assert result.shape[0] == X.shape[0]
+
+@pytest.fixture
+def hyperparams_ls():
+    return [None, (25, 175), None]
+
+@pytest.fixture
+def args_in(zarr_loc, hyperparams_ls):
+    return [zarr_loc, hyperparams_ls]
+
+def test_run_base_clustering_valid_input(args_in):
+    result = es.tl.clustering.run_base_clustering(args_in)
+    assert isinstance(result, sparse.coo_matrix)
 
 # get_hard_soft_clusters
 
