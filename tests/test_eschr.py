@@ -115,7 +115,7 @@ def test_get_subsamp_size():
     assert np.abs(subsample_frac_1mil - subsample_frac_100mil) < 10
 
 # get_hyperparameters
-def test_get_hyperparameters(k_range, la_res_range):
+def test_get_hyperparameters():
     k_range = (15, 150)
     la_res_range = (25, 175)
     k, la_res, metric = es.tl.clustering.get_hyperparameters(k_range, la_res_range)
