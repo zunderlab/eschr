@@ -166,9 +166,12 @@ def test_run_base_clustering_valid_input(args_in):
 @pytest.fixture
 def setup_data():
     n = 10
-    clustering = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2, 2])
-    edges = [(0, 10), (1, 10), (1, 11), (2, 10), (2, 11), (3, 12), (4, 12), (5, 12), (6, 13), (7, 13), (8, 13), (9, 13)]
-    bg = Graph.TupleList(edges, directed=False)
+    clustering = np.array([0,0,1,2]) #this is cluster assigns of the base clusters
+    edges = np.concatenate((np.expand_dims(np.array([0,1,1,2,2,3,4,5,6,7,8,9]), axis=1), np.expand_dims(np.array([0,0,1,0,1,2,2,2,3,3,3,3]) + n, axis=1)), axis=1)
+    bg = Graph(edges).as_undirected()
+    type_ls = [0] * n  
+    type_ls.extend([1] * (bg.vcount() - n))  
+    bg.vs["type"] = type_ls 
     return n, clustering, bg
     
 # consensus_cluster_leiden
