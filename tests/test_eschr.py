@@ -173,6 +173,33 @@ def setup_data():
     type_ls.extend([1] * (bg.vcount() - n))  
     bg.vs["type"] = type_ls 
     return n, clustering, bg
+
+def test_get_hard_soft_clusters(setup_data):
+    n, clustering, bg = setup_data
+    hard_clusters, soft_membership_matrix = es.tl.clustering.get_hard_soft_clusters(n, clustering, bg)
+
+    # Test hard cluster assignments
+    assert len(hard_clusters) == n
+    assert np.all(np.unique(hard_clusters) == np.array([0, 1, 2])) 
+
+    # Test soft membership matrix shape
+    unique_clusters = len(np.unique(clustering))
+    assert soft_membership_matrix.shape == (n, unique_clusters)
+
+    # Test soft membership matrix properties
+    assert np.allclose(soft_membership_matrix.sum(axis=1), 1)
+    assert np.all(soft_membership_matrix >= 0)
+
+def test_get_hard_soft_clusters_single_cluster(setup_data):
+    n, clustering, bg = setup_data
+    clustering = np.zeros(clustering.shape[0])
+    hard_clusters, soft_membership_matrix = es.tl.clustering.get_hard_soft_clusters(n, clustering, bg)
+
+    # Test hard cluster assignments
+    assert np.all(hard_clusters == 0)
+
+    # Test soft membership matrix
+    assert np.allclose(soft_membership_matrix, np.ones((n, 1)))
     
 # consensus_cluster_leiden
 
