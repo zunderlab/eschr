@@ -164,10 +164,18 @@ def test_run_base_clustering_valid_input(args_in):
 
 # get_hard_soft_clusters
 @pytest.fixture
-def setup_data():
-    n = 10
+def bipartite_graph_array():
+    row = np.array([0,1,1,2,2,3,4,5,6,7,8,9])
+    col = np.array([0,0,1,0,1,2,2,2,3,3,3,3])
+    data = np.ones_like(row, dtype=int)
+    bipartite = coo_matrix((data, (row, col)), shape=(np.max(row)+1, np.max(col)+1))
+    return bipartite
+    
+@pytest.fixture
+def setup_data(bipartite_graph_array):
+    n = np.max(bipartite_graph_array)+1
     clustering = np.array([0,0,1,2]) #this is cluster assigns of the base clusters
-    edges = np.concatenate((np.expand_dims(np.array([0,1,1,2,2,3,4,5,6,7,8,9]), axis=1), np.expand_dims(np.array([0,0,1,0,1,2,2,2,3,3,3,3]) + n, axis=1)), axis=1)
+    edges = np.concatenate((np.expand_dims(bipartite_graph_array.row, axis=1), np.expand_dims(bipartite_graph_array.col + n, axis=1)), axis=1)
     bg = Graph(edges).as_undirected()
     type_ls = [0] * n  
     type_ls.extend([1] * (bg.vcount() - n))  
@@ -202,7 +210,18 @@ def test_get_hard_soft_clusters_single_cluster(setup_data):
     assert np.allclose(soft_membership_matrix, np.ones((n, 1)))
     
 # consensus_cluster_leiden
+def test_consensus_cluster_leiden(bipartite_graph_array):
+    bipartite = bipartite_graph_array
+    n = np.max(bipartite_graph_array)+1
+    in_args = (n, 1.0, bipartite)
+    hard_clusters, soft_membership_matrix, resolution = es.tl.clustering.consensus_cluster_leiden(in_args)
 
+    assert isinstance(hard_clusters, pd.Categorical)
+    assert len(hard_clusters) == n
+    assert isinstance(soft_membership_matrix, csr_matrix)
+    assert soft_membership_matrix.shape == (n, np.unique(hard_clusters).shape[0])
+    assert np.allclose(soft_membership_matrix.sum(axis=1), 1.0)
+    assert resolution == 1.0
 
 # TEST PLOTTING FUNCTIONS
 def test_smm_heatmap_default(adata_with_results):
