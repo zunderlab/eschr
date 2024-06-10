@@ -163,7 +163,14 @@ def test_run_base_clustering_valid_input(args_in):
     assert isinstance(result, coo_matrix)
 
 # get_hard_soft_clusters
-
+@pytest.fixture
+def setup_data():
+    n = 10
+    clustering = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2, 2])
+    edges = [(0, 10), (1, 10), (1, 11), (2, 10), (2, 11), (3, 12), (4, 12), (5, 12), (6, 13), (7, 13), (8, 13), (9, 13)]
+    bg = Graph.TupleList(edges, directed=False)
+    return n, clustering, bg
+    
 # consensus_cluster_leiden
 
 
