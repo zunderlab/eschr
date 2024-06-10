@@ -174,7 +174,7 @@ def bipartite_graph_array():
     
 @pytest.fixture
 def setup_data(bipartite_graph_array):
-    n = np.max(bipartite_graph_array)+1
+    n = np.max(bipartite_graph_array.row)+1
     clustering = np.array([0,0,1,2]) #this is cluster assigns of the base clusters
     edges = np.concatenate((np.expand_dims(bipartite_graph_array.row, axis=1), np.expand_dims(bipartite_graph_array.col + n, axis=1)), axis=1)
     bg = Graph(edges).as_undirected()
