@@ -1,9 +1,9 @@
 from importlib.metadata import version
 
 from .consensus_cluster import ConsensusCluster
+from .plotting import make_smm_heatmap, plot_umap
 # from . import pl
 from .read_write_utils import csv_to_zarr, make_zarr
-from .plotting import make_smm_heatmap, plot_umap
 
 # from __future__ import absolute_import
 # import eschr._read_write_utils
