@@ -555,7 +555,7 @@ def consensus(n, bg, nprocs):
         tested for final consensus clustering.
     """
     ## Run final consensus
-    res_ls = [x / 1000 for x in range(50, 725, 25)]  # 0.05 to 0.7 inclusive by 0.025
+    res_ls = [x / 1000 for x in range(50, 975, 25)]  # 0.05 to 0.95 inclusive by 0.025
 
     print("starting consensus multiprocess")
     start_time = time.perf_counter()
