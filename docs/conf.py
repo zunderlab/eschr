@@ -4,9 +4,9 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import os
 # -- Path setup --------------------------------------------------------------
 import sys
-import os
 from datetime import datetime
 from importlib.metadata import metadata
 from pathlib import Path
@@ -14,8 +14,8 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, f"{HERE.parent}")
 sys.path.insert(0, str(HERE / "extensions"))
-sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath("."))
+sys.path.insert(0, os.path.abspath("../"))
 
 
 # -- Project information -----------------------------------------------------
@@ -126,6 +126,3 @@ nitpick_ignore = [
     # you can add an exception to this list.
     #     ("py:class", "igraph.Graph"),
 ]
-
-
-

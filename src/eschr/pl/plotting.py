@@ -27,7 +27,14 @@ sys.setrecursionlimit(1000000)
 # flake8: noqa: E266
 
 
-def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", show=True, output_path=None):
+def smm_heatmap(
+    adata,
+    features=None,
+    smm_cmap="gray_r",
+    feat_cmap="YlOrBr",
+    show=True,
+    output_path=None,
+):
     """
     Make a heatmap of soft cluster memberships.
 
@@ -51,16 +58,26 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
     # Order rows by hclust or if too large by multidimensional sort
     if adata.obsm["soft_membership_matrix"].shape[0] <= 50000:
         row_order = hierarchy.dendrogram(
-            hierarchy.linkage(pdist(adata.obsm["soft_membership_matrix"]), method="average"),
+            hierarchy.linkage(
+                pdist(adata.obsm["soft_membership_matrix"]), method="average"
+            ),
             no_plot=True,
             color_threshold=-np.inf,
         )["leaves"]
     else:
-        smm_with_index = np.insert(adata.obsm["soft_membership_matrix"], 0, list(range(adata.obsm["soft_membership_matrix"].shape[0])), axis=1)
+        smm_with_index = np.insert(
+            adata.obsm["soft_membership_matrix"],
+            0,
+            list(range(adata.obsm["soft_membership_matrix"].shape[0])),
+            axis=1,
+        )
         # Sort the list using sorted() function
         # and lambda function for multiple attributes
-        sorted_list = sorted(smm_with_index.tolist(), key = lambda x: [x[i] for i in range(1,smm_with_index.shape[1])])
-        row_order = np.array(sorted_list)[:,0].astype(int).tolist()
+        sorted_list = sorted(
+            smm_with_index.tolist(),
+            key=lambda x: [x[i] for i in range(1, smm_with_index.shape[1])],
+        )
+        row_order = np.array(sorted_list)[:, 0].astype(int).tolist()
     # Re-order clusters to fall along the diagonal for easier visual interpretation
     row_col_order_dict = slanted_orders(
         adata.obsm["soft_membership_matrix"][row_order, :],
@@ -418,7 +435,13 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
 
 
 def umap_heatmap(
-    adata, features=None, cat_palette="tab20", cont_palette="viridis_r", show=True, output_path=None, **kwargs
+    adata,
+    features=None,
+    cat_palette="tab20",
+    cont_palette="viridis_r",
+    show=True,
+    output_path=None,
+    **kwargs,
 ):
     """
     Make UMAP plot colored by hard clusters and confidence scores.
