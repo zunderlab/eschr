@@ -10,7 +10,7 @@ import anndata
 import numpy as np
 import pandas as pd
 from igraph import Graph
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix, csr_matrix
 
 # to run test_eschr.py on your local machine, please set up as follows:
 # - install extra package into your eschr environment: pytest, pytest-cov
