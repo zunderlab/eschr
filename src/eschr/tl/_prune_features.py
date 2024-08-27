@@ -6,8 +6,9 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import issparse
 
-#warnings.filterwarnings('ignore', message='*Note that scikit-learn's randomized PCA might not be exactly reproducible*')
+# warnings.filterwarnings('ignore', message='*Note that scikit-learn's randomized PCA might not be exactly reproducible*')
 warnings.filterwarnings("ignore")
+
 
 def materialize_as_ndarray(a):
     """Convert distributed arrays to ndarrays."""
@@ -97,7 +98,9 @@ def calc_highly_variable_genes(
     """
     print("extracting highly variable genes")
 
-    if n_top_genes is not None and not all([min_disp is None, max_disp is None, min_mean is None, max_mean is None]):
+    if n_top_genes is not None and not all(
+        [min_disp is None, max_disp is None, min_mean is None, max_mean is None]
+    ):
         # logg.info
         print("If you pass `n_top_genes`, all cutoffs are ignored.")
 
@@ -143,16 +146,24 @@ def calc_highly_variable_genes(
             )
         # Circumvent pandas 0.23 bug. Both sides of the assignment have dtype==float32,
         # but there’s still a dtype error without “.value”.
-        disp_std_bin[one_gene_per_bin.values] = disp_mean_bin[one_gene_per_bin.values].values
+        disp_std_bin[one_gene_per_bin.values] = disp_mean_bin[
+            one_gene_per_bin.values
+        ].values
         disp_mean_bin[one_gene_per_bin.values] = 0
         # actually do the normalization
         df["dispersions_norm"] = (
-            df["dispersions"].values - disp_mean_bin[df["mean_bin"].values].values  # use values here as index differs
+            df["dispersions"].values
+            - disp_mean_bin[
+                df["mean_bin"].values
+            ].values  # use values here as index differs
         ) / disp_std_bin[df["mean_bin"].values].values
     elif flavor == "cell_ranger":
         from statsmodels import robust
 
-        df["mean_bin"] = pd.cut(df["means"], np.r_[-np.inf, np.percentile(df["means"], np.arange(10, 105, 5)), np.inf])
+        df["mean_bin"] = pd.cut(
+            df["means"],
+            np.r_[-np.inf, np.percentile(df["means"], np.arange(10, 105, 5)), np.inf],
+        )
         disp_grouped = df.groupby("mean_bin")["dispersions"]
         disp_median_bin = disp_grouped.median()
         # the next line raises the warning: "Mean of empty slice"
@@ -167,12 +178,17 @@ def calc_highly_variable_genes(
     dispersion_norm = df["dispersions_norm"].values.astype("float32")
     if n_top_genes is not None:
         dispersion_norm = dispersion_norm[~np.isnan(dispersion_norm)]
-        dispersion_norm[::-1].sort()  # interestingly, np.argpartition is slightly slower
+        dispersion_norm[
+            ::-1
+        ].sort()  # interestingly, np.argpartition is slightly slower
         disp_cut_off = dispersion_norm[n_top_genes - 1]
         gene_subset = np.nan_to_num(df["dispersions_norm"].values) >= disp_cut_off
         # logg.debug(
         # raise Exception(
-        print(f"the {n_top_genes} top genes correspond to a " f"normalized dispersion cutoff of {disp_cut_off}")
+        print(
+            f"the {n_top_genes} top genes correspond to a "
+            f"normalized dispersion cutoff of {disp_cut_off}"
+        )
     else:
         dispersion_norm[np.isnan(dispersion_norm)] = 0  # similar to Seurat
         gene_subset = np.logical_and.reduce(
@@ -206,7 +222,9 @@ def calc_simple_filter(X) -> np.array:  #: Union[np.ndarray, spmatrix]
         Bool indicating if a gene is in the highly variable set or not.
     """
     percent_zeros = np.array((X <= 1.0).sum(0))[0] / X.shape[0] * 100
-    gene_subset = np.where(percent_zeros <= 99)[0]  # drop any features with >99% zeros and 1s
+    gene_subset = np.where(percent_zeros <= 99)[
+        0
+    ]  # drop any features with >99% zeros and 1s
     return gene_subset
 
 
@@ -254,21 +272,24 @@ def calc_pca(
     X_pca : :class:`scipy.sparse.spmatrix` or :class:`numpy.ndarray`
         PCA representation of data.
     """
-    #if svd_solver in {"auto", "randomized"}:
+    # if svd_solver in {"auto", "randomized"}:
     # Add logging infrastructure post-submission
     # logg.info(
-    #print(
+    # print(
     #    "Note that scikit-learn's randomized PCA might not be exactly "
     #    "reproducible across different computational platforms. For exact "
     #    "reproducibility, choose `svd_solver='arpack'.` This will likely "
     #    "become the Scanpy default in the future."
-    #)
+    # )
 
     if X.shape[1] < n_comps:
         n_comps = X.shape[1] - 1
         # logg.debug(
         # raise Exception(
-        print(f"reducing number of computed PCs to {n_comps} " f"as dim of data is only {X.shape[1]}")
+        print(
+            f"reducing number of computed PCs to {n_comps} "
+            f"as dim of data is only {X.shape[1]}"
+        )
 
     if zero_center is None:
         zero_center = not issparse(X)
@@ -278,23 +299,30 @@ def calc_pca(
         if issparse(X):
             # logg.debug(
             raise Exception(
-                "    as `zero_center=True`, " "sparse input is densified and may " "lead to huge memory consumption",
+                "    as `zero_center=True`, "
+                "sparse input is densified and may "
+                "lead to huge memory consumption",
             )
-            X = X.toarray()  # Copying the whole adata_comp.X here, could cause memory problems
+            X = (
+                X.toarray()
+            )  # Copying the whole adata_comp.X here, could cause memory problems
         else:
             X = X
-        pca_ = PCA(n_components=n_comps, svd_solver=svd_solver, random_state=random_state)
+        pca_ = PCA(
+            n_components=n_comps, svd_solver=svd_solver, random_state=random_state
+        )
     else:
         from sklearn.decomposition import TruncatedSVD
+
         # Add logging infrastructure post-submission
         # logg.debug(
         # raise Exception(
-        #print(
+        # print(
         #    "    without zero-centering: \n"
         #    + "    the explained variance does not correspond to the exact statistical defintion\n"
         #    + "    the first component, e.g., might be heavily influenced by different means\n"
         #    + "    the following components often resemble the exact PCA very closely"
-        #)
+        # )
         pca_ = TruncatedSVD(n_components=n_comps, random_state=random_state)
     X_pca = pca_.fit_transform(X)
 

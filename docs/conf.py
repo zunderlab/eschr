@@ -95,7 +95,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandas": ("https://pandas.pydata.org/docs/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-    #"igraph": ("https://python.igraph.org/stable/", None),
+    # "igraph": ("https://python.igraph.org/stable/", None),
     "leidenalg": ("https://leidenalg.readthedocs.io/en/stable/", None),
 }
 

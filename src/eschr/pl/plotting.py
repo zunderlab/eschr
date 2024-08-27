@@ -27,18 +27,7 @@ sys.setrecursionlimit(1000000)
 # flake8: noqa: E266
 
 
-<<<<<<< HEAD:src/eschr/pl/plotting.py
 def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", show=True, output_path=None):
-=======
-def make_smm_heatmap(
-    adata,
-    features=None,
-    smm_cmap="gray_r",
-    feat_cmap="YlOrBr",
-    show=True,
-    output_path=None,
-):
->>>>>>> main:src/eschr/plotting.py
     """
     Make a heatmap of soft cluster memberships.
 
@@ -59,7 +48,6 @@ def make_smm_heatmap(
         Path specifying where to save the plot. If none, plot is not saved.
     """
     # Prep soft membership matrix data for plotting
-<<<<<<< HEAD:src/eschr/pl/plotting.py
     # Order rows by hclust or if too large by multidimensional sort
     if adata.obsm["soft_membership_matrix"].shape[0] <= 50000:
         row_order = hierarchy.dendrogram(
@@ -74,19 +62,6 @@ def make_smm_heatmap(
         sorted_list = sorted(smm_with_index.tolist(), key = lambda x: [x[i] for i in range(1,smm_with_index.shape[1])])
         row_order = np.array(sorted_list)[:,0].astype(int).tolist()
     # Re-order clusters to fall along the diagonal for easier visual interpretation
-=======
-    hard_clust = np.unique(adata.obs["hard_clusters"])
-    adata.obsm["soft_membership_matrix"] = adata.obsm["soft_membership_matrix"][
-        :, hard_clust
-    ]
-    row_order = hierarchy.dendrogram(
-        hierarchy.linkage(
-            pdist(adata.obsm["soft_membership_matrix"]), method="average"
-        ),
-        no_plot=True,
-        color_threshold=-np.inf,
-    )["leaves"]
->>>>>>> main:src/eschr/plotting.py
     row_col_order_dict = slanted_orders(
         adata.obsm["soft_membership_matrix"][row_order, :],
         order_rows=False,
@@ -178,25 +153,11 @@ def make_smm_heatmap(
         )
 
     if output_path is not None:
-<<<<<<< HEAD:src/eschr/pl/plotting.py
         plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
         if show:
             plt.show()
         else:
             plt.close(fig)
-=======
-        try:
-            plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
-            if show:
-                plt.show()
-            else:
-                plt.close(annotations_heatmap)
-        except Exception as e:
-            print(e)
-            print(
-                "You must provide an directory path to output_dir if save_plot is True"
-            )
->>>>>>> main:src/eschr/plotting.py
     else:
         plt.show()
 
@@ -456,19 +417,8 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
         adata.obsm["X_umap"] = res
 
 
-<<<<<<< HEAD:src/eschr/pl/plotting.py
 def umap_heatmap(
     adata, features=None, cat_palette="tab20", cont_palette="viridis_r", show=True, output_path=None, **kwargs
-=======
-def plot_umap(
-    adata,
-    features=None,
-    cat_palette="tab20",
-    cont_palette="viridis_r",
-    show=True,
-    output_path=None,
-    **kwargs,
->>>>>>> main:src/eschr/plotting.py
 ):
     """
     Make UMAP plot colored by hard clusters and confidence scores.
