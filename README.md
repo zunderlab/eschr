@@ -14,13 +14,14 @@ ESCHR: A hyperparameter-randomized ensemble approach for robust clustering acros
 ![figure](figure.png)
 
 ## Quick Start
-You can try out the method without needing to install ESCHR locally with this [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb) 
+
+This [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb) provides a walkthrough of ESCHR analysis using an example scRNA-seq dataset. If you launch the notebook in Google Colab, you will not need to install ESCHR locally.
 
 ## Installation
 
 You need to have a Python version between 3.8 and 3.10 (inclusive) installed on your system. If you don't have
 Python installed, we recommend installing [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge).
-(*If you are installing on a Windows OS, you will need to use python version 3.8 only due to issues with installing the nmslib dependency in other versions*)
+(_If you are installing on a Windows OS, you will need to use python version 3.8 only due to issues with installing the nmslib dependency in other versions_)
 
 1. Make sure you have Anaconda installed and functional. [Conda FAQ](https://docs.anaconda.com/anaconda/user-guide/faq/) is a great resource for troubleshooting and verifying that everything is working properly.
 2. Open terminal or equivalent command line interface and run `conda create --name <env_name> python=<version>` (e.g. `conda create --name eschrEnv python=3.8`)
@@ -95,7 +96,7 @@ Now you can run code adapted from the example run scripts above or copy and past
 3. Next run `python -m ipykernel install --user --name=<env_name>`.
 4. You can then then close the environment by running `conda deactivate`
 5. Open Anaconda Navigator and click on the icon for Jupyter Notebooks (this should open an instance of a command line interface, and then open a tab in your default browser to a page containing your PC's file structure)
-6. Navigate to where you saved the downloaded tutorial notebook (instructions for downloading tutorial can be found in `Tutorial` section below) and click to open that notebook, or start a fresh notebook if you prefer to work off of the `Quick Start` instructions.
+6. Navigate to where you saved the downloaded [tutorial notebook](./docs/notebooks/paul15.ipynb) and click to open that notebook, or start a fresh notebook if you prefer to work off of the `Quick Start` instructions with your own data.
 7. Upon opening the notebook, you may be prompted to select a kernel, or if not you can click on the `Kernel` menu from the top navigation bar, and then `Change kernel`. The name of the environment you created should show up as an option for the kernel - select that as the kernel for your notebook.
 8. You should now be ready to run! Just click your way through the notebook. You can change output paths for the visualizations when you get to those cells.
 
@@ -115,7 +116,7 @@ Now you can run code adapted from the example run scripts above or copy and past
 
 ## Release notes
 
-*Note: pre-release v0.1.0 was used for making figures in the submitted manuscript*
+_Note: pre-release v0.1.0 was used for making figures in the submitted manuscript_
 
 See the [changelog][changelog].
 
@@ -126,7 +127,9 @@ If you found a bug, please use the [issue tracker][issue-tracker].
 
 ## Citation
 
-> t.b.a
+    A hyperparameter-randomized ensemble approach for robust clustering across diverse datasets
+    Sarah M. Goggin, Eli R. Zunder
+    bioRxiv 2023.12.18.571953; doi: https://doi.org/10.1101/2023.12.18.571953
 
 [issue-tracker]: https://github.com/zunderlab/eschr/issues
 [changelog]: https://eschr.readthedocs.io/latest/changelog.html
