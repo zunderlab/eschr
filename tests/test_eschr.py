@@ -213,7 +213,7 @@ def test_get_hard_soft_clusters_single_cluster(setup_data):
 # consensus_cluster_leiden
 def test_consensus_cluster_leiden(bipartite_graph_array):
     bipartite = bipartite_graph_array
-    n = np.max(bipartite_graph_array)+1
+    n = np.max(bipartite_graph_array.row)+1
     in_args = (n, 1.0, bipartite)
     hard_clusters, soft_membership_matrix, resolution = es.tl.clustering.consensus_cluster_leiden(in_args)
 
