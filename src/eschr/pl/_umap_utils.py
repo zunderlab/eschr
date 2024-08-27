@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 from cycler import Cycler, cycler
 from matplotlib import patheffects
-from matplotlib.cm import get_cmap
 from matplotlib.colors import is_color_like, to_hex
+from matplotlib.pyplot import get_cmap
 from pandas.api.types import is_categorical_dtype
 
 sys.setrecursionlimit(1000000)

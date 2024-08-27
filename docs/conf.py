@@ -4,6 +4,7 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import os
 # -- Path setup --------------------------------------------------------------
 import sys
 from datetime import datetime
@@ -11,7 +12,10 @@ from importlib.metadata import metadata
 from pathlib import Path
 
 HERE = Path(__file__).parent
+sys.path.insert(0, f"{HERE.parent}")
 sys.path.insert(0, str(HERE / "extensions"))
+sys.path.insert(0, os.path.abspath("."))
+sys.path.insert(0, os.path.abspath("../"))
 
 
 # -- Project information -----------------------------------------------------
@@ -35,7 +39,7 @@ html_context = {
     "display_github": True,  # Integrate GitHub
     "github_user": "zunderlab",  # Username
     "github_repo": project_name,  # Repo name
-    "github_version": "main",  # Version
+    "github_version": "change_api",  # Version
     "conf_py_path": "/docs/",  # Path in the checkout to the docs root
 }
 
@@ -122,18 +126,3 @@ nitpick_ignore = [
     # you can add an exception to this list.
     #     ("py:class", "igraph.Graph"),
 ]
-
-
-def setup(app):
-    """App setup hook."""
-    app.add_config_value(
-        "recommonmark_config",
-        {
-            "auto_toc_tree_section": "Contents",
-            "enable_auto_toc_tree": True,
-            "enable_math": True,
-            "enable_inline_math": False,
-            "enable_eval_rst": True,
-        },
-        True,
-    )

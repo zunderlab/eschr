@@ -1,0 +1,1 @@
+.. literalinclude:: ../CHANGELOG.md

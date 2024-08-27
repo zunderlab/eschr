@@ -12,8 +12,8 @@ from scipy.cluster import hierarchy
 from scipy.sparse import issparse
 from scipy.spatial.distance import pdist
 
+from ..tl._prune_features import calc_highly_variable_genes, calc_pca
 from . import _umap_utils
-from ._prune_features import calc_highly_variable_genes, calc_pca
 
 mpl.use("Agg")  # this makes plt.show not work
 
@@ -27,7 +27,7 @@ sys.setrecursionlimit(1000000)
 # flake8: noqa: E266
 
 
-def make_smm_heatmap(
+def smm_heatmap(
     adata,
     features=None,
     smm_cmap="gray_r",
@@ -55,17 +55,30 @@ def make_smm_heatmap(
         Path specifying where to save the plot. If none, plot is not saved.
     """
     # Prep soft membership matrix data for plotting
-    hard_clust = np.unique(adata.obs["hard_clusters"])
-    adata.obsm["soft_membership_matrix"] = adata.obsm["soft_membership_matrix"][
-        :, hard_clust
-    ]
-    row_order = hierarchy.dendrogram(
-        hierarchy.linkage(
-            pdist(adata.obsm["soft_membership_matrix"]), method="average"
-        ),
-        no_plot=True,
-        color_threshold=-np.inf,
-    )["leaves"]
+    # Order rows by hclust or if too large by multidimensional sort
+    if adata.obsm["soft_membership_matrix"].shape[0] <= 50000:
+        row_order = hierarchy.dendrogram(
+            hierarchy.linkage(
+                pdist(adata.obsm["soft_membership_matrix"]), method="average"
+            ),
+            no_plot=True,
+            color_threshold=-np.inf,
+        )["leaves"]
+    else:
+        smm_with_index = np.insert(
+            adata.obsm["soft_membership_matrix"],
+            0,
+            list(range(adata.obsm["soft_membership_matrix"].shape[0])),
+            axis=1,
+        )
+        # Sort the list using sorted() function
+        # and lambda function for multiple attributes
+        sorted_list = sorted(
+            smm_with_index.tolist(),
+            key=lambda x: [x[i] for i in range(1, smm_with_index.shape[1])],
+        )
+        row_order = np.array(sorted_list)[:, 0].astype(int).tolist()
+    # Re-order clusters to fall along the diagonal for easier visual interpretation
     row_col_order_dict = slanted_orders(
         adata.obsm["soft_membership_matrix"][row_order, :],
         order_rows=False,
@@ -78,7 +91,7 @@ def make_smm_heatmap(
     ]
     smm_reordered = smm_reordered[:, row_col_order_dict["cols"].tolist()]
 
-    # For now plot_features is not enabled because it needs soem troubleshooting
+    # For now plot_features is not enabled because it needs some troubleshooting
     plot_features = False
     if plot_features:
         plt.rcParams["figure.figsize"] = [15, 5]  # needs to adapt to number of features
@@ -157,17 +170,11 @@ def make_smm_heatmap(
         )
 
     if output_path is not None:
-        try:
-            plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
-            if show:
-                plt.show()
-            else:
-                plt.close(annotations_heatmap)
-        except Exception as e:
-            print(e)
-            print(
-                "You must provide an directory path to output_dir if save_plot is True"
-            )
+        plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
+        if show:
+            plt.show()
+        else:
+            plt.close(fig)
     else:
         plt.show()
 
@@ -427,7 +434,7 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
         adata.obsm["X_umap"] = res
 
 
-def plot_umap(
+def umap_heatmap(
     adata,
     features=None,
     cat_palette="tab20",

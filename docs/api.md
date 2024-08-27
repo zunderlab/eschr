@@ -21,7 +21,7 @@
 
 ```{eval-rst}
 .. automodule:: eschr.plotting
-   :members: 
+   :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
