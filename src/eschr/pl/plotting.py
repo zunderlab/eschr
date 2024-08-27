@@ -7,10 +7,10 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 import seaborn as sns
+import umap
 from scipy.cluster import hierarchy
 from scipy.sparse import issparse
 from scipy.spatial.distance import pdist
-import umap
 
 from ..tl._prune_features import calc_highly_variable_genes, calc_pca
 from . import _umap_utils
@@ -27,7 +27,18 @@ sys.setrecursionlimit(1000000)
 # flake8: noqa: E266
 
 
+<<<<<<< HEAD:src/eschr/pl/plotting.py
 def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", show=True, output_path=None):
+=======
+def make_smm_heatmap(
+    adata,
+    features=None,
+    smm_cmap="gray_r",
+    feat_cmap="YlOrBr",
+    show=True,
+    output_path=None,
+):
+>>>>>>> main:src/eschr/plotting.py
     """
     Make a heatmap of soft cluster memberships.
 
@@ -48,6 +59,7 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         Path specifying where to save the plot. If none, plot is not saved.
     """
     # Prep soft membership matrix data for plotting
+<<<<<<< HEAD:src/eschr/pl/plotting.py
     # Order rows by hclust or if too large by multidimensional sort
     if adata.obsm["soft_membership_matrix"].shape[0] <= 50000:
         row_order = hierarchy.dendrogram(
@@ -62,6 +74,19 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         sorted_list = sorted(smm_with_index.tolist(), key = lambda x: [x[i] for i in range(1,smm_with_index.shape[1])])
         row_order = np.array(sorted_list)[:,0].astype(int).tolist()
     # Re-order clusters to fall along the diagonal for easier visual interpretation
+=======
+    hard_clust = np.unique(adata.obs["hard_clusters"])
+    adata.obsm["soft_membership_matrix"] = adata.obsm["soft_membership_matrix"][
+        :, hard_clust
+    ]
+    row_order = hierarchy.dendrogram(
+        hierarchy.linkage(
+            pdist(adata.obsm["soft_membership_matrix"]), method="average"
+        ),
+        no_plot=True,
+        color_threshold=-np.inf,
+    )["leaves"]
+>>>>>>> main:src/eschr/plotting.py
     row_col_order_dict = slanted_orders(
         adata.obsm["soft_membership_matrix"][row_order, :],
         order_rows=False,
@@ -69,13 +94,15 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         squared_order=True,
         discount_outliers=True,
     )
-    smm_reordered = adata.obsm["soft_membership_matrix"][row_order, :][row_col_order_dict["rows"].tolist(), :]
+    smm_reordered = adata.obsm["soft_membership_matrix"][row_order, :][
+        row_col_order_dict["rows"].tolist(), :
+    ]
     smm_reordered = smm_reordered[:, row_col_order_dict["cols"].tolist()]
 
     # For now plot_features is not enabled because it needs some troubleshooting
     plot_features = False
     if plot_features:
-        plt.rcParams["figure.figsize"] = [15, 5] #needs to adapt to number of features
+        plt.rcParams["figure.figsize"] = [15, 5]  # needs to adapt to number of features
         fig, (ax1, ax2) = plt.subplots(1, 2)
     else:
         plt.rcParams["figure.figsize"] = [10, 5]
@@ -109,18 +136,28 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         elif isinstance(features, np.ndarray):
             features = features
         else:
-            raise Exception("provided features must be in the form of a list, numpy array, or pandas series")
+            raise Exception(
+                "provided features must be in the form of a list, numpy array, or pandas series"
+            )
 
         if issparse(adata.X):
-            exprs_arr = adata.X[:, :].toarray()[row_order, :][row_col_order_dict["rows"].tolist(), :]
+            exprs_arr = adata.X[:, :].toarray()[row_order, :][
+                row_col_order_dict["rows"].tolist(), :
+            ]
         else:
-            exprs_arr = adata.X[:, :][row_order, :][row_col_order_dict["rows"].tolist(), :]
+            exprs_arr = adata.X[:, :][row_order, :][
+                row_col_order_dict["rows"].tolist(), :
+            ]
         print("exprs arr reordered")
         var_names = adata.var_names
-        exprs_cols_ls = [exprs_arr[:, np.nonzero(var_names.astype(str) == x)[0][0]] for x in features]
+        exprs_cols_ls = [
+            exprs_arr[:, np.nonzero(var_names.astype(str) == x)[0][0]] for x in features
+        ]
         print("exprs_cols_ls done")
         exprs_mat = pd.DataFrame(exprs_cols_ls).T
-        exprs_mat = exprs_mat.reindex(columns=exprs_mat.columns[row_col_order_dict["cols"].tolist()])
+        exprs_mat = exprs_mat.reindex(
+            columns=exprs_mat.columns[row_col_order_dict["cols"].tolist()]
+        )
         exprs_mat.columns = features[row_col_order_dict["cols"].tolist()]
         print("reindex done")
         exprs_mat = exprs_mat.apply(min_max_scaler, axis=1)
@@ -135,17 +172,34 @@ def smm_heatmap(adata, features=None, smm_cmap="gray_r", feat_cmap="YlOrBr", sho
         )
 
         annotations_heatmap.set_xticklabels(
-            annotations_heatmap.get_xticklabels(), rotation=30, horizontalalignment="right"
+            annotations_heatmap.get_xticklabels(),
+            rotation=30,
+            horizontalalignment="right",
         )
 
     if output_path is not None:
+<<<<<<< HEAD:src/eschr/pl/plotting.py
         plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
         if show:
             plt.show()
         else:
             plt.close(fig)
+=======
+        try:
+            plt.savefig(output_path, bbox_inches="tight", pad_inches=0.05, dpi=600)
+            if show:
+                plt.show()
+            else:
+                plt.close(annotations_heatmap)
+        except Exception as e:
+            print(e)
+            print(
+                "You must provide an directory path to output_dir if save_plot is True"
+            )
+>>>>>>> main:src/eschr/plotting.py
     else:
         plt.show()
+
 
 def min_max_scaler(data_1d_vec, min_val=0, max_val=1):
     """
@@ -168,6 +222,7 @@ def min_max_scaler(data_1d_vec, min_val=0, max_val=1):
     x, y = min(data_1d_vec), max(data_1d_vec)
     scaled_data_1d_vec = (data_1d_vec - x) / (y - x) * (max_val - min_val) + min_val
     return scaled_data_1d_vec
+
 
 def slanted_orders(
     data,
@@ -227,7 +282,13 @@ def slanted_orders(
             data = data * data
 
         def reorder_phase(
-            data, best_rows_permutation, best_cols_permutation, row_indices, col_indices, rows_count, cols_count
+            data,
+            best_rows_permutation,
+            best_cols_permutation,
+            row_indices,
+            col_indices,
+            rows_count,
+            cols_count,
         ):  # figure out cleaner way to have it inherit scope
             rows_permutation = best_rows_permutation
             cols_permutation = best_cols_permutation
@@ -294,7 +355,13 @@ def slanted_orders(
             return best_rows_permutation, best_cols_permutation
 
         best_rows_permutation, best_cols_permutation = reorder_phase(
-            data, best_rows_permutation, best_cols_permutation, row_indices, col_indices, rows_count, cols_count
+            data,
+            best_rows_permutation,
+            best_cols_permutation,
+            row_indices,
+            col_indices,
+            rows_count,
+            cols_count,
         )
 
     return {"rows": best_rows_permutation, "cols": best_cols_permutation}
@@ -372,7 +439,7 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
     **X_umap** : `adata.obsm` field
         UMAP coordinates of data.
     """
-    
+
     if adata.X.shape[1] > 6000:
         bool_features = calc_highly_variable_genes(adata.X)
         X = adata.X[:, bool_features]
@@ -380,15 +447,28 @@ def run_umap(adata, return_layout=False, n_neighbors=15, metric="euclidean", **k
         X = adata.X
     X_pca = np.array(calc_pca(X))
     ### FUNCTIONALITY FOR INITIAL POSITIONS WILL BE ADDED
-    res = umap.UMAP(n_components=2, n_neighbors=n_neighbors, metric=metric, **kwargs).fit_transform(X_pca)
+    res = umap.UMAP(
+        n_components=2, n_neighbors=n_neighbors, metric=metric, **kwargs
+    ).fit_transform(X_pca)
     if return_layout:
         return res
     else:
         adata.obsm["X_umap"] = res
 
 
+<<<<<<< HEAD:src/eschr/pl/plotting.py
 def umap_heatmap(
     adata, features=None, cat_palette="tab20", cont_palette="viridis_r", show=True, output_path=None, **kwargs
+=======
+def plot_umap(
+    adata,
+    features=None,
+    cat_palette="tab20",
+    cont_palette="viridis_r",
+    show=True,
+    output_path=None,
+    **kwargs,
+>>>>>>> main:src/eschr/plotting.py
 ):
     """
     Make UMAP plot colored by hard clusters and confidence scores.
@@ -422,20 +502,29 @@ def umap_heatmap(
             try:
                 print("No umap found - checking for existing umap layout file...")
                 adata.obsm["X_umap"] = np.array(
-                    pd.read_csv(os.path.join(("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"))
+                    pd.read_csv(
+                        os.path.join(
+                            ("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"
+                        )
+                    )
                 )
             except Exception as e:
                 print(e)
                 print("No umap found - running umap...")
                 run_umap(adata)
-                pd.DataFrame(adata.obsm['X_umap']).to_csv(os.path.join(("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"), index=None)
+                pd.DataFrame(adata.obsm["X_umap"]).to_csv(
+                    os.path.join(
+                        ("/").join(output_path.split("/")[0:-1]), "umap_layout.csv"
+                    ),
+                    index=None,
+                )
         else:
             print("No umap found - running umap...")
             run_umap(adata)
     # For now specifying plot_features is not available, needs troubleshooting
     features_to_plot = ["hard_clusters", "uncertainty_score"]
     ("Done umap, generating figures...")
-    plt.rcParams['figure.figsize'] = [10, 8]
+    plt.rcParams["figure.figsize"] = [10, 8]
     if output_path is not None:
         try:
             # sc.plt.umap(adata, color=features_to_plot, s=50, frameon=False, ncols=3, palette='tab20', save=output_path)
@@ -462,6 +551,14 @@ def umap_heatmap(
         except Exception as e:
             print(e)
     else:
-        _umap_utils.embedding(adata, color=features_to_plot, frameon=False, ncols=2, palette=cat_palette, cmap="viridis_r", **kwargs)
+        _umap_utils.embedding(
+            adata,
+            color=features_to_plot,
+            frameon=False,
+            ncols=2,
+            palette=cat_palette,
+            cmap="viridis_r",
+            **kwargs,
+        )
         # palette=cluster_color_dict, edgecolor='none', size = 15, vmax=200)
         plt.show()
