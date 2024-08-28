@@ -29,4 +29,4 @@ You can try out the method without needing to install ESCHR locally with this `e
    :maxdepth: 2
    :hidden:
 
-   notebooks/paul15
+   notebooks/paul15_mouse_hematopoiesis
