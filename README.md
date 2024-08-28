@@ -15,7 +15,7 @@ ESCHR: A hyperparameter-randomized ensemble approach for robust clustering acros
 
 ## Quick Start
 
-This [example jupyter notebook on Google Colab](./docs/notebooks/paul15.ipynb) provides a walkthrough of ESCHR analysis using an example scRNA-seq dataset. If you launch the notebook in Google Colab, you will not need to install ESCHR locally.
+This [example jupyter notebook on Google Colab](./docs/notebooks/paul15_mouse_hematopoiesis.ipynb) provides a walkthrough of ESCHR analysis using an example scRNA-seq dataset. If you launch the notebook in Google Colab, you will not need to install ESCHR locally.
 
 ## Installation
 
