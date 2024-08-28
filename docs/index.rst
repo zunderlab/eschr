@@ -10,7 +10,7 @@ Overview of Algorithm:
 Quick Start
 -----------
 
-You can try out the method without needing to install ESCHR locally with this `example jupyter notebook on Google Colab <./docs/notebooks/paul15.ipynb>`_.
+You can try out the method without needing to install ESCHR locally with this `example jupyter notebook on Google Colab <./docs/notebooks/paul15_mouse_hematopoiesis.ipynb>`_.
 
 
 .. toctree::
