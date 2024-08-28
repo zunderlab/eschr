@@ -36,4 +36,4 @@ Make plots
     :toctree: .
 
     pl.smm_heatmap
-    pl.umap
+    pl.umap_heatmap
