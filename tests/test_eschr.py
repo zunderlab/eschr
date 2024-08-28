@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 import zarr
 from igraph import Graph
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix, csr_matrix
 
 import eschr as es
 
@@ -246,7 +246,7 @@ def test_get_hard_soft_clusters_single_cluster(setup_data):
 # consensus_cluster_leiden
 def test_consensus_cluster_leiden(bipartite_graph_array):
     bipartite = bipartite_graph_array
-    n = np.max(bipartite_graph_array) + 1
+    n = np.max(bipartite_graph_array.row) + 1
     in_args = (n, 1.0, bipartite)
     (
         hard_clusters,
