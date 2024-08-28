@@ -4,7 +4,7 @@ References
 .. [Wolf18] Wolf *et al.* (2018),
    *Scanpy: large-scale single-cell gene expression data analysis*,
    `Genome Biology <https://doi.org/10.1186/s13059-017-1382-0>`__.
-   
+
 .. [McInnes18] McInnes & Healy (2018),
    *UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction*,
    `arXiv <https://arxiv.org/abs/1802.03426>`__.

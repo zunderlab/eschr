@@ -1,6 +1,6 @@
 from importlib.metadata import version
 
-from . import pl, tl, readwrite
+from . import pl, readwrite, tl
 
 __all__ = ["pl", "tl", "readwrite"]
 
