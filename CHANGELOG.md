@@ -8,9 +8,16 @@ and this project adheres to [Semantic Versioning][].
 [keep a changelog]: https://keepachangelog.com/en/1.0.0/
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 
-## [Unreleased]
+## [v1.0.0]
 
--   will be adding tests, logging, and improving documentation
+### Changed
+
+-   API changed to enable more streamlined user exerience
+-   Zarr data structure is now created within the main clustering function so users only interface with an AnnData object
+
+### Added
+
+-   Tests for all major functions
 
 ## [v0.2.0]
 
