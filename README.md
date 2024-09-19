@@ -9,8 +9,6 @@
 
 ESCHR: A hyperparameter-randomized ensemble approach for robust clustering across diverse datasets
 
-## Getting started
-
 Please refer to the full [documentation][link-docs] for further details.
 
 ## Overview of Algorithm:
