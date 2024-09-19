@@ -9,13 +9,17 @@
 
 ESCHR: A hyperparameter-randomized ensemble approach for robust clustering across diverse datasets
 
+## Getting started
+
+Please refer to the full [documentation][link-docs] for further details.
+
 ## Overview of Algorithm:
 
 ![figure](https://github.com/zunderlab/eschr/raw/main/figure.png)
 
 ## Quick Start
 
-This [example jupyter notebook on Google Colab](./docs/notebooks/paul15_mouse_hematopoiesis.ipynb) provides a walkthrough of ESCHR analysis using an example scRNA-seq dataset. If you launch the notebook in Google Colab, you will not need to install ESCHR locally.
+This [example jupyter notebook on Google Colab](https://github.com/zunderlab/eschr/raw/main/docs/notebooks/paul15_mouse_hematopoiesis.ipynb) provides a walkthrough of ESCHR analysis using an example scRNA-seq dataset. If you launch the notebook in Google Colab, you will not need to install ESCHR locally.
 
 ## Installation
 
@@ -32,9 +36,6 @@ Python installed, we recommend installing [Mambaforge](https://github.com/conda-
    `pip install git+https://github.com/zunderlab/eschr.git`
 7. Verify that the Conda environment was created successfully by running `conda list` and verifying that expected packages are installed for this environment. Then either close the environment by running `conda deactivate` or proceed to subsequent optional setup and/or running the method within the environment.
 
-## Getting started
-
-Please refer to the full [documentation][link-docs] for further details.
 
 ### Most basic example run script:
 
@@ -97,7 +98,7 @@ Now you can run code adapted from the example run scripts above or copy and past
 3. Next run `python -m ipykernel install --user --name=<env_name>`.
 4. You can then then close the environment by running `conda deactivate`
 5. Open Anaconda Navigator and click on the icon for Jupyter Notebooks (this should open an instance of a command line interface, and then open a tab in your default browser to a page containing your PC's file structure)
-6. Navigate to where you saved the downloaded [tutorial notebook](./docs/notebooks/paul15.ipynb) and click to open that notebook, or start a fresh notebook if you prefer to work off of the `Quick Start` instructions with your own data.
+6. Navigate to where you saved the downloaded [tutorial notebook](https://github.com/zunderlab/eschr/raw/main/docs/notebooks/paul15_mouse_hematopoiesis.ipynb) and click to open that notebook, or start a fresh notebook if you prefer to work off of the `Quick Start` instructions with your own data.
 7. Upon opening the notebook, you may be prompted to select a kernel, or if not you can click on the `Kernel` menu from the top navigation bar, and then `Change kernel`. The name of the environment you created should show up as an option for the kernel - select that as the kernel for your notebook.
 8. You should now be ready to run! Just click your way through the notebook. You can change output paths for the visualizations when you get to those cells.
 
