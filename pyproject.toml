@@ -5,7 +5,7 @@ requires = ["hatchling"]
 
 [project]
 name = "eschr"
-version = "1.0.0"
+version = "1.0.1"
 description = "A hyperparameter-randomized ensemble approach for robust clustering across diverse datasets"
 readme = "README.md"
 requires-python = ">=3.7, <=3.10.13" #, <=3.10.13
