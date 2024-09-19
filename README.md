@@ -21,6 +21,10 @@ This [example jupyter notebook on Google Colab](https://github.com/zunderlab/esc
 
 ## Installation
 
+### Quick install
+`pip install eschr`
+
+### Detailed installation instructions
 You need to have a Python version between 3.8 and 3.10 (inclusive) installed on your system. If you don't have
 Python installed, we recommend installing [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge).
 (_If you are installing on a Windows OS, you will need to use python version 3.8 only due to issues with installing the nmslib dependency in other versions_)
@@ -30,12 +34,14 @@ Python installed, we recommend installing [Mambaforge](https://github.com/conda-
 3. Activate the environment by running `conda activate <env_name>`
 4. Once environment is activated, run `conda install pip`
 5. If you do not have Git installed, run `conda install git`
-6. To install ESCHR into your conda environment, run the following line:
+6. To install the most up to date version of ESCHR into your conda environment, run the following line:
    `pip install git+https://github.com/zunderlab/eschr.git`
-7. Verify that the Conda environment was created successfully by running `conda list` and verifying that expected packages are installed for this environment. Then either close the environment by running `conda deactivate` or proceed to subsequent optional setup and/or running the method within the environment.
+   or to install teh latest release, run:
+   `pip install eschr`
+8. Verify that the Conda environment was created successfully by running `conda list` and verifying that expected packages are installed for this environment. Then either close the environment by running `conda deactivate` or proceed to subsequent optional setup and/or running the method within the environment.
 
 
-### Most basic example run script:
+## Basic example run script:
 
 If you want to try ESCHR on your own data, you can start with this basic example script. This assumes that you have a preprocessed .csv file with features as columns and cells or other data points as rows.
 
@@ -77,7 +83,7 @@ es.pl.smm_heatmap(adata, output_path="/where/to/save/figure.png")
 es.pl.umap_heatmap(adata, output_path="/where/to/save/figure.png")
 ```
 
-### Setting up to run via command line:
+## Setting up to run via command line:
 
 ```
 conda activate <env_name>
@@ -87,7 +93,7 @@ import eschr
 
 Now you can run code adapted from the example run scripts above or copy and paste lines of code from the tutorial jupyter notebook.
 
-### Setting up to run a Jupyter Notebook on your PC:
+## Setting up to run a Jupyter Notebook on your PC:
 
 (note it is likely only small datasets will be able to run on a PC, but feel free to try large ones!)
 
@@ -100,7 +106,7 @@ Now you can run code adapted from the example run scripts above or copy and past
 7. Upon opening the notebook, you may be prompted to select a kernel, or if not you can click on the `Kernel` menu from the top navigation bar, and then `Change kernel`. The name of the environment you created should show up as an option for the kernel - select that as the kernel for your notebook.
 8. You should now be ready to run! Just click your way through the notebook. You can change output paths for the visualizations when you get to those cells.
 
-### Setting up to run a Jupyter Notebook on HPC OpenOnDemand:
+## Setting up to run a Jupyter Notebook on HPC OpenOnDemand:
 
 1. Navigate to [UVA OpenOnDemand](https://rivanna-portal.hpc.virginia.edu/pun/sys/dashboard/) if you are a member of the University fo Virginia, otherwise navigate to the equivalent for your institution.
 2. Enter the dropdown menu for "Interactive Apps" from the top menu bar and select "JupyterLab"
@@ -116,8 +122,6 @@ Now you can run code adapted from the example run scripts above or copy and past
 
 ## Release notes
 
-_Note: pre-release v0.1.0 was used for making figures in the submitted manuscript_
-
 See the [changelog][changelog].
 
 ## Contact
@@ -127,9 +131,7 @@ If you found a bug, please use the [issue tracker][issue-tracker].
 
 ## Citation
 
-    A hyperparameter-randomized ensemble approach for robust clustering across diverse datasets
-    Sarah M. Goggin, Eli R. Zunder
-    bioRxiv 2023.12.18.571953; doi: https://doi.org/10.1101/2023.12.18.571953
+    Goggin, S.M., Zunder, E.R. ESCHR: a hyperparameter-randomized ensemble approach for robust clustering across diverse datasets. Genome Biol 25, 242 (2024). https://doi.org/10.1186/s13059-024-03386-5
 
 [issue-tracker]: https://github.com/zunderlab/eschr/issues
 [changelog]: https://eschr.readthedocs.io/latest/changelog.html
