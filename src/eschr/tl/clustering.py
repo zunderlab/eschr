@@ -16,6 +16,8 @@ from igraph import Graph
 from scipy.sparse import coo_matrix, csr_matrix, hstack
 from scipy.spatial.distance import pdist, squareform
 from sklearn import metrics
+from anndata.experimental import read_dispatched, write_dispatched, read_elem
+import dask.array as da
 
 from ._leiden import run_la_clustering  # _base_clustering_utils _leiden
 from ._prune_features import (  # ADD BACK PRECEDING DOTS
@@ -156,6 +158,66 @@ def make_zarr(adata, zarr_loc):
     )
     data_data[:] = data.data
 
+def read_dask(zarr_loc):
+    """
+    Read dask anndata from zarr data store.
+
+    Parameters
+    ----------
+    zarr_loc : str
+        Path to zarr store containing the data to be clustered.
+
+    Returns
+    -------
+    adata : `anndata.AnnData`
+        AnnData object containing preprocessed data to be clustered in slot `.X`
+    """
+    f = zarr.open(zarr_loc, mode="r")
+
+    def callback(func, elem_name: str, elem, iospec):
+        if iospec.encoding_type in (
+            "dataframe",
+            "csr_matrix",
+            "csc_matrix",
+            "awkward-array",
+        ):
+            # Preventing recursing inside of these types
+            return read_elem(elem)
+        elif iospec.encoding_type == "array":
+            return da.from_zarr(elem)
+        else:
+            return func(elem)
+
+    adata = read_dispatched(f, callback=callback)
+
+    return adata
+
+def make_dask(adata, zarr_loc):
+    """
+    Make dask anndata.
+
+    Parameters
+    ----------
+    adata : `anndata.AnnData`
+        AnnData object containing preprocessed data to be clustered in slot `.X`
+    zarr_loc : str
+        Path to save zarr store which will hold the data to be clustered.
+
+    Returns
+    -------
+    adata_dask : `anndata.AnnData`
+        AnnData object containing preprocessed data to be clustered in slot `.X`
+    """
+    if zarr_loc == None:
+        zarr_loc = os.getcwd() + "/data_store.zarr"
+    print("storing zarr data object as " + zarr_loc)
+    
+    adata.write_zarr(zarr_loc, chunks=[5000, adata.shape[1]])
+    zarr.consolidate_metadata(zarr_loc)
+
+    adata_dask = read_dask(dest)
+
+    return adata_dask
 
 ############################################################################### UTILS
 def get_subsamp_size(n):  # n==data.shape[0]
@@ -193,6 +255,13 @@ def get_subsamp_size(n):  # n==data.shape[0]
     subsample_size = math.ceil((subsample_ratio / 100) * n)
     return subsample_size
 
+def random_subsample(adata_dask, frac):
+    # Get random indices of the required subsample size
+    size = int(adata_dask.X.shape[0] * frac)
+    indices = np.random.choice(adata_dask.X.shape[0], size, replace=False)
+    # Extract the subsample using fancy indexing
+    subsample = adata_dask.X[indices]
+    return subsample
 
 ## Get hyperparameters
 def get_hyperparameters(k_range, la_res_range, metric=None):
@@ -460,14 +529,14 @@ def consensus_cluster_leiden(in_args):
 ############################################################################### MAIN FUNCTIONS
 
 
-def ensemble(zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, nprocs):
+def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range, nprocs):
     """
     Run ensemble of clusterings.
 
     Parameters
     ----------
-    zarr_loc : str
-        Path to save zarr store which will hold the data to be clustered.
+    adata_dask : `anndata.AnnData`
+        AnnData object containing preprocessed data to be clustered in slot `.X`
     reduction : {'all', ‘pca’}
         Which method to use for feature extraction/selection/dimensionality
         reduction, or `all` for use all features. Currently only PCA is
@@ -503,23 +572,29 @@ def ensemble(zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, 
     """
     start_time = time.perf_counter()
 
-    data_iterator = repeat(zarr_loc, ensemble_size)
+    # Define the sizes of subsamples
+    n = adata_dask.shape[0]
+    subsample_fracs = [get_subsamp_size(n) for i in range(ensemble_size)]
+    
+    # Create a list of subsamples with different sizes
+    subsamples = [random_subsample(adata_dask, frac) for frac in subsample_fracs]
+
+    # Zip to list of other hyperparameters
     hyperparam_iterator = [
         [k_range, la_res_range, metric] for x in range(ensemble_size)
     ]
-    args = list(zip(data_iterator, hyperparam_iterator))
-
-    print("starting ensemble clustering multiprocess")
-    # out = np.array(parmap(run_base_clustering, args, nprocs=nprocs))
-    out = parmap(run_base_clustering, args, nprocs=nprocs)
+    args_ls = list(zip(subsamples, hyperparam_iterator))
+    
+    # Apply clustering to each subsample in parallel
+    clustered_results = [args.map_blocks(cluster_subsample,dtype='int64', drop_axis=1) for args in args_ls]
 
     try:
-        clust_out = hstack(out)  # [x[0] for x in out]
+        clust_out = hstack(clustered_results)  # [x[0] for x in out]
     except Exception:
         print(
             "consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])"
         )
-
+        
     finish_time = time.perf_counter()
     print(f"Ensemble clustering finished in {finish_time-start_time} seconds")
 
@@ -657,9 +732,11 @@ def consensus_cluster(
     # Make zarr store for multiproces data access
     # NEED TO ADD SOME SORT OF CHECK FOR THIS STEP
     # to test if path is valid, if data is actually there
-    if os.path.exists(zarr_loc) == False:
-        print("making zarr")
-        make_zarr(adata, zarr_loc)
+    #if os.path.exists(zarr_loc) == False:
+    #    print("making zarr")
+    #    make_zarr(adata, zarr_loc)
+    print("making dask-compatible zarr-backed anndata object")
+    adata_dask = make_dask(adata, zarr_loc)
 
     # Generate ensemble of base clusterings
     k_range = (int(k_range[0]), int(k_range[1]))
@@ -668,7 +745,7 @@ def consensus_cluster(
         int(la_res_range[1]),
     )  # , per_iter_clust_assigns
     bipartite = ensemble(
-        zarr_loc=zarr_loc,
+        adata_dask=adata_dask,
         reduction=reduction,
         metric=metric,
         ensemble_size=ensemble_size,
