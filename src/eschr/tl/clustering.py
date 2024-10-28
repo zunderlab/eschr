@@ -215,7 +215,7 @@ def make_dask(adata, zarr_loc):
     adata.write_zarr(zarr_loc, chunks=[5000, adata.shape[1]])
     zarr.consolidate_metadata(zarr_loc)
 
-    adata_dask = read_dask(dest)
+    adata_dask = read_dask(zarr_loc)
 
     return adata_dask
 
