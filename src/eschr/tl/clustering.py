@@ -575,9 +575,15 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
     # Define the sizes of subsamples
     n = adata_dask.shape[0]
     subsample_fracs = [get_subsamp_size(n) for i in range(ensemble_size)]
+
+    print(subsample_fracs[0:10])
     
     # Create a list of subsamples with different sizes
-    subsamples = [random_subsample(adata_dask, frac) for frac in subsample_fracs]
+    #subsamples = [random_subsample(adata_dask, frac) for frac in subsample_fracs]
+    subsamples = []
+    for frac in subsample_fracs:
+        print(frac)
+        subsamples.append(random_subsample(adata_dask, frac))
 
     # Zip to list of other hyperparameters
     hyperparam_iterator = [
