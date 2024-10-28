@@ -252,7 +252,7 @@ def get_subsamp_size(n):  # n==data.shape[0]
     while subsample_ratio >= 100 or subsample_ratio < 10:
         subsample_ratio = random.gauss(mu=mu, sigma=10)
     ## Calculate subsample size
-    subsample_size = math.ceil((subsample_ratio / 100) * n)
+    subsample_size = subsample_ratio / 100 #math.ceil((subsample_ratio / 100) * n)
     return subsample_size
 
 def random_subsample(adata_dask, frac):
