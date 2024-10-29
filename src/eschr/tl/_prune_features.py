@@ -230,6 +230,7 @@ def calc_simple_filter(X) -> np.array:  #: Union[np.ndarray, spmatrix]
 
 def calc_pca(
     X,  #: Union[np.ndarray, spmatrix],
+    n_features: int = 51,
     n_comps: int = 50,
     zero_center: Optional[bool] = None,
     svd_solver: str = "auto",
@@ -249,6 +250,8 @@ def calc_pca(
     X
         The data matrix of shape ``n_obs`` × ``n_vars``.
         Rows correspond to cells and columns to genes.
+    n_features
+        Number of features input to PCA.
     n_comps
         Number of principal components to compute.
     zero_center
@@ -282,13 +285,13 @@ def calc_pca(
     #    "become the Scanpy default in the future."
     # )
 
-    if X.shape[1] < n_comps:
-        n_comps = X.shape[1] - 1
+    if n_features < n_comps:
+        n_comps = n_features - 1
         # logg.debug(
         # raise Exception(
         print(
             f"reducing number of computed PCs to {n_comps} "
-            f"as dim of data is only {X.shape[1]}"
+            f"as dim of data is only {n_features}"
         )
 
     if zero_center is None:
