@@ -612,7 +612,7 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
         subsample, indices = random_subsample(adata_dask, frac)
         
         # Step 2: Apply clustering as a delayed task
-        result = dask.delayed(cluster_subsample)(subsample, 
+        result = dask.delayed(run_base_clustering)(subsample, 
                                                 hyperparams_ls=[k_range, la_res_range, metric], 
                                                 subsample_ids=indices, 
                                                 n_orig=n,
