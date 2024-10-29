@@ -18,6 +18,8 @@ from scipy.spatial.distance import pdist, squareform
 from sklearn import metrics
 from anndata.experimental import read_dispatched, write_dispatched, read_elem
 import dask.array as da
+from dask.distributed import Client
+import dask
 
 from ._leiden import run_la_clustering  # _base_clustering_utils _leiden
 from ._prune_features import (  # ADD BACK PRECEDING DOTS
@@ -586,6 +588,11 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
     """
     start_time = time.perf_counter()
 
+    # Initialize a Dask client with a specific number of workers and threads
+    num_workers = nprocs     # Number of processes (i.e., workers)
+    #threads_per_worker = 2  # Number of threads per worker
+    client = Client(n_workers=num_workers)
+
     # Define the sizes of subsamples
     n = adata_dask.shape[0]
     
@@ -604,15 +611,12 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
         # Step 1: Generate subsample data and indices
         subsample, indices = random_subsample(adata_dask, frac)
         
-        # Step 2: Use map_blocks to apply clustering on each subsample in parallel
-        result = subsample.map_blocks(
-            run_base_clustering,
-            dtype='int64', 
-            drop_axis=1, 
-            hyperparams_ls=[k_range, la_res_range, metric], 
-            subsample_ids=indices, 
-            n_orig=n,
-            n_features=n_features
+        # Step 2: Apply clustering as a delayed task
+        result = dask.delayed(cluster_subsample)(subsample, 
+                                                hyperparams_ls=[k_range, la_res_range, metric], 
+                                                subsample_ids=indices, 
+                                                n_orig=n,
+                                                n_features=n_features
         )
         
         clustered_results.append(result)
@@ -622,16 +626,19 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
     #                                          hyperparams_ls=[k_range, la_res_range, metric], 
     #                                          subsample_ids=subsample_ids, n_orig=n_orig) for subsample in subsamples]
 
-    # Compute the results (this triggers the actual computation)
-    final_results = [result.compute() for result in clustered_results]
-    
+    # Trigger parallel computation of all delayed results
+    final_results = dask.compute(*clustered_results)
+
+    # Close the client
+    client.close()
+
     try:
         clust_out = hstack(final_results)  # [x[0] for x in out]
     except Exception:
         print(
             "consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])"
         )
-        
+
     finish_time = time.perf_counter()
     print(f"Ensemble clustering finished in {finish_time-start_time} seconds")
 
