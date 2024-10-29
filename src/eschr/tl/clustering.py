@@ -313,7 +313,7 @@ def get_hyperparameters(k_range, la_res_range, metric=None):
     return k, la_res, metric
 
 
-def run_pca_dim_reduction(X):
+def run_pca_dim_reduction(X, n_features):
     """
     Produce PCA-reduced data matrix.
 
@@ -334,14 +334,14 @@ def run_pca_dim_reduction(X):
         to cells and columns to PCA-extracted features.
     """
     time.time()
-    if X.shape[1] > 6000:  # somewhat arbitrary cutoff, come up with better heuristic?
+    if n_features > 6000:  # somewhat arbitrary cutoff, come up with better heuristic?
         bool_features = calc_highly_variable_genes(X)
         X = X[:, bool_features]
-    X_pca = np.array(calc_pca(X))
+    X_pca = np.array(calc_pca(X, n_features))
     return X_pca
 
 
-def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig):
+def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig, n_features):
     """
     Run a single iteration of leiden clustering.
 
@@ -400,7 +400,7 @@ def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig):
                 print("Data likely needs to be preprocessed, results may be suboptimal")
 
         ## Data subspace feature extraction
-        data = run_pca_dim_reduction(data)
+        data = run_pca_dim_reduction(data, n_features)
         ## Run leiden clustering
         clusters = run_la_clustering(
             X=data, k=iter_k, la_res=la_res / 100, metric=metric
@@ -587,6 +587,7 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
 
     # Define the sizes of subsamples
     n = adata_dask.shape[0]
+    
     subsample_fracs = [get_subsamp_size(n) for i in range(ensemble_size)]
 
     print(subsample_fracs[0:10])
@@ -596,7 +597,7 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
 
     # Create a list to hold clustered results
     clustered_results = []
-    
+    n_features = adata_dask.shape[1]
     # Loop over each subsample, pass indices and data to map_blocks
     for frac in subsample_fracs:
         # Step 1: Generate subsample data and indices
@@ -609,7 +610,8 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
             drop_axis=1, 
             hyperparams_ls=[k_range, la_res_range, metric], 
             subsample_ids=indices, 
-            n_orig=n
+            n_orig=n,
+            n_features=n_features
         )
         
         clustered_results.append(result)
