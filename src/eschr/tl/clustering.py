@@ -600,7 +600,7 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
     # Loop over each subsample, pass indices and data to map_blocks
     for frac in subsample_fracs:
         # Step 1: Generate subsample data and indices
-        subsample, indices = random_subsample(dask_array, frac)
+        subsample, indices = random_subsample(adata_dask, frac)
         
         # Step 2: Use map_blocks to apply clustering on each subsample in parallel
         result = subsample.map_blocks(
