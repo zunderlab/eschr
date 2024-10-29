@@ -211,8 +211,9 @@ def make_dask(adata, zarr_loc):
     if zarr_loc == None:
         zarr_loc = os.getcwd() + "/data_store.zarr"
     print("storing zarr data object as " + zarr_loc)
-    
-    adata.write_zarr(zarr_loc, chunks=[5000, adata.shape[1]])
+
+    row_chunks = min(5000, (adata.X.shape[0]//2)+1)
+    adata.write_zarr(zarr_loc, chunks=[row_chunks, adata.shape[1]])
     zarr.consolidate_metadata(zarr_loc)
 
     adata_dask = read_dask(zarr_loc)
