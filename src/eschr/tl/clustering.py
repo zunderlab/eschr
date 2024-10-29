@@ -261,7 +261,21 @@ def random_subsample(adata_dask, frac):
     indices = np.random.choice(adata_dask.X.shape[0], size, replace=False)
     # Extract the subsample using fancy indexing
     subsample = adata_dask.X[indices]
-    return subsample
+    return subsample, indices
+
+def prep_ensemble_outputs(clusters, subsample_ids, n_orig):
+    a = np.zeros((n_orig), dtype=np.uint8)
+    a[subsample_ids] = clusters[0] + 1
+    b = np.ones((n_orig), dtype=np.uint8)
+    c = np.zeros((n_orig, len(np.unique(a))), dtype=np.uint8)
+    np.put_along_axis(
+        arr=c,
+        indices=np.expand_dims(a, axis=1),
+        values=np.expand_dims(b, axis=1),
+        axis=1,
+    )  # )#,
+    c = np.delete(c, 0, 1)
+    return coo_matrix(c)
 
 ## Get hyperparameters
 def get_hyperparameters(k_range, la_res_range, metric=None):
@@ -327,7 +341,7 @@ def run_pca_dim_reduction(X):
     return X_pca
 
 
-def run_base_clustering(args_in):
+def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig):
     """
     Run a single iteration of leiden clustering.
 
@@ -347,22 +361,22 @@ def run_base_clustering(args_in):
     """
     try:
         # LOAD DATA
-        zarr_loc = args_in[0]
-        hyperparams_ls = args_in[1]
+        #zarr_loc = args_in[0]
+        #hyperparams_ls = args_in[1]
 
-        z1 = zarr.open(zarr_loc, mode="r")
-        data = coo_matrix(
-            (z1["X"]["data"][:], (z1["X"]["row"][:], z1["X"]["col"][:])),
-            shape=[np.max(z1["X"]["row"][:]) + 1, np.max(z1["X"]["col"][:]) + 1],
-        ).tocsr()
+        #z1 = zarr.open(zarr_loc, mode="r")
+        #data = coo_matrix(
+        #    (z1["X"]["data"][:], (z1["X"]["row"][:], z1["X"]["col"][:])),
+        #    shape=[np.max(z1["X"]["row"][:]) + 1, np.max(z1["X"]["col"][:]) + 1],
+        #).tocsr()
 
         # Calculate subsample size for this ensemble member
-        subsample_size = get_subsamp_size(data.shape[0])
+        #subsample_size = get_subsamp_size(data.shape[0])
         # Get indices for random subsample
-        subsample_ids = random.sample(range(data.shape[0]), subsample_size)
+        #subsample_ids = random.sample(range(data.shape[0]), subsample_size)
         ## Subsample data
-        n_orig = data.shape[0]  # save original number of data points
-        data = data[subsample_ids, :]
+        #n_orig = data.shape[0]  # save original number of data points
+        #data = data[subsample_ids, :]
 
         # Get hyperparameters
         # scale k range for selecting number of neighbors
@@ -391,8 +405,7 @@ def run_base_clustering(args_in):
         clusters = run_la_clustering(
             X=data, k=iter_k, la_res=la_res / 100, metric=metric
         )
-        ## Prepare outputs for this ensemble member
-        len(np.unique(clusters))
+
         a = np.zeros((n_orig), dtype=np.uint8)
         a[subsample_ids] = clusters[0] + 1
         b = np.ones((n_orig), dtype=np.uint8)
@@ -403,7 +416,7 @@ def run_base_clustering(args_in):
             values=np.expand_dims(b, axis=1),
             axis=1,
         )  # )#,
-        c = np.delete(c, 0, 1)
+        c = np.delete(c, 0, 1) 
 
     except Exception as ex:
         traceback.print_exception(type(ex), ex, ex.__traceback__)
@@ -580,22 +593,37 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
     
     # Create a list of subsamples with different sizes
     #subsamples = [random_subsample(adata_dask, frac) for frac in subsample_fracs]
-    subsamples = []
-    for frac in subsample_fracs:
-        print(frac)
-        subsamples.append(random_subsample(adata_dask, frac))
 
-    # Zip to list of other hyperparameters
-    hyperparam_iterator = [
-        [k_range, la_res_range, metric] for x in range(ensemble_size)
-    ]
-    args_ls = list(zip(subsamples, hyperparam_iterator))
+    # Create a list to hold clustered results
+    clustered_results = []
+    
+    # Loop over each subsample, pass indices and data to map_blocks
+    for frac in subsample_fracs:
+        # Step 1: Generate subsample data and indices
+        subsample, indices = random_subsample(dask_array, frac)
+        
+        # Step 2: Use map_blocks to apply clustering on each subsample in parallel
+        result = subsample.map_blocks(
+            run_base_clustering,
+            dtype='int64', 
+            drop_axis=1, 
+            hyperparams_ls=[k_range, la_res_range, metric], 
+            subsample_ids=indices, 
+            n_orig=n
+        )
+        
+        clustered_results.append(result)
     
     # Apply clustering to each subsample in parallel
-    clustered_results = [args.map_blocks(cluster_subsample,dtype='int64', drop_axis=1) for args in args_ls]
+    #clustered_results = [subsample.map_blocks(cluster_subsample,dtype='int64', drop_axis=1, 
+    #                                          hyperparams_ls=[k_range, la_res_range, metric], 
+    #                                          subsample_ids=subsample_ids, n_orig=n_orig) for subsample in subsamples]
 
+    # Compute the results (this triggers the actual computation)
+    final_results = [result.compute() for result in clustered_results]
+    
     try:
-        clust_out = hstack(clustered_results)  # [x[0] for x in out]
+        clust_out = hstack(final_results)  # [x[0] for x in out]
     except Exception:
         print(
             "consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])"
