@@ -21,6 +21,10 @@ import dask.array as da
 from dask.distributed import Client
 from dask_ml.decomposition import PCA
 import dask
+import cudf
+import cugraph
+from cuml.neighbors import NearestNeighbors
+from cugraph.community import louvain
 
 from ._leiden import run_la_clustering  # _base_clustering_utils _leiden
 from ._prune_features import (  # ADD BACK PRECEDING DOTS
@@ -347,6 +351,31 @@ def run_pca_dim_reduction(X, n_features):
     X_pca = pca.fit_transform(X)  
     return X_pca
 
+# Function to build nearest neighbors graph and apply Louvain clustering
+def cluster_with_louvain(data, n_neighbors):
+    # Convert subsample to a cuDF DataFrame for RAPIDS compatibility
+    data_df = cudf.DataFrame.from_records(data)
+    
+    # Step 1: Nearest Neighbors Search
+    nn = NearestNeighbors(n_neighbors=n_neighbors)
+    nn.fit(data_df)
+    distances, neighbors = nn.kneighbors(data_df)
+    
+    # Step 2: Create a graph from the neighbors' indices
+    src = cudf.Series(np.repeat(list(range(data.shape[0])), n_neighbors))  # Repeat indices for each neighbor
+    dst = cudf.Series(neighbors.flatten())
+    weights = cudf.Series(distances.flatten())
+    
+    # Create a cuGraph graph from the edges
+    G = cugraph.Graph()
+    G.from_cudf_edgelist(cudf.DataFrame({'src': src, 'dst': dst, 'weights': weights}), 
+                         source='src', destination='dst', edge_attr='weights')
+    
+    # Step 3: Run Louvain clustering on the graph
+    parts, _ = louvain(G)
+    
+    # Combine the indices and cluster labels
+    return parts['partition'] #cudf.DataFrame({'index': indices, 'cluster': parts['partition']})
 
 def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig, n_features):
     """
@@ -409,9 +438,10 @@ def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig, n_features)
         ## Data subspace feature extraction
         data = run_pca_dim_reduction(data, n_features)
         ## Run leiden clustering
-        clusters = run_la_clustering(
-            X=data, k=iter_k, la_res=la_res / 100, metric=metric
-        )
+        #clusters = run_la_clustering(
+        #    X=data, k=iter_k, la_res=la_res / 100, metric=metric
+        #)
+        clusters = cluster_with_louvain(data=data, n_neighbors=iter_k)
 
         a = np.zeros((n_orig), dtype=np.uint8)
         a[subsample_ids] = clusters[0] + 1
