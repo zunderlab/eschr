@@ -19,6 +19,7 @@ from sklearn import metrics
 from anndata.experimental import read_dispatched, write_dispatched, read_elem
 import dask.array as da
 from dask.distributed import Client
+from dask_ml.decomposition import PCA
 import dask
 
 from ._leiden import run_la_clustering  # _base_clustering_utils _leiden
@@ -340,7 +341,10 @@ def run_pca_dim_reduction(X, n_features):
     if n_features > 6000:  # somewhat arbitrary cutoff, come up with better heuristic?
         bool_features = calc_highly_variable_genes(X)
         X = X[:, bool_features]
-    X_pca = np.array(calc_pca(X, n_features))
+    #X_pca = np.array(calc_pca(X, n_features))
+    ncomps = min(50, n_features-1)
+    pca = PCA(n_components=ncomps)
+    X_pca = pca.fit_transform(X)  
     return X_pca
 
 
