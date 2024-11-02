@@ -9,3 +9,10 @@ scanpy
 scipy==1.7.3
 umap-learn==0.5.2
 matplotlib
+dask==2024.9.1
+dask-ml
+rapidsai
+nvidia
+cuml
+cugraph
+cudatoolkit
