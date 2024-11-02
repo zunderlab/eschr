@@ -33,7 +33,7 @@ dependencies = [
     "nvidia",
     "cuml",
     "cugraph",
-    "cudatoolkit",
+    #"cudatoolkit",
     "scanpy",
     "scipy",
     "umap-learn", #==0.5.2
