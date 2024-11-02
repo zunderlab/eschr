@@ -27,6 +27,13 @@ dependencies = [
     "numpy", #>=1.22
     "pandas", #==1.5.3
     "zarr",
+    "dask==2024.9.1",
+    "dask-ml",
+    "rapidsai",
+    "nvidia",
+    "cuml",
+    "cugraph",
+    "cudatoolkit",
     "scanpy",
     "scipy",
     "umap-learn", #==0.5.2
