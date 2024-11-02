@@ -30,7 +30,7 @@ dependencies = [
     "dask==2024.9.1",
     "dask-ml",
     "rapidsai",
-    "nvidia",
+    #"nvidia",
     "cuml",
     "cugraph",
     #"cudatoolkit",
