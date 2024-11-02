@@ -12,7 +12,6 @@ matplotlib
 dask==2024.9.1
 dask-ml
 rapidsai
-nvidia
 cuml
 cugraph
 
