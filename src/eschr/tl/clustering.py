@@ -579,7 +579,7 @@ def consensus_cluster_leiden(in_args):
 ############################################################################### MAIN FUNCTIONS
 
 
-def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range, nprocs):
+def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range, nprocs, mem_per_core):
     """
     Run ensemble of clusterings.
 
@@ -612,6 +612,8 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
         `multiprocessing.cpu_count()` to find number of available cores.
         This is used as a check and the minimum value between number of
         cores detected and specified number of processes is set as final value.
+    mem_per_core : str
+        Maximum memory usage per core given system constraints.
 
     Returns
     -------
@@ -623,9 +625,10 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
     start_time = time.perf_counter()
 
     # Initialize a Dask client with a specific number of workers and threads
-    num_workers = nprocs     # Number of processes (i.e., workers)
+    #num_workers = nprocs     # Number of processes (i.e., workers)
     #threads_per_worker = 2  # Number of threads per worker
-    client = Client(n_workers=num_workers)
+    #mem_per_core
+    client = Client(n_workers=nprocs, memory_limit=mem_per_core)
 
     # Define the sizes of subsamples
     n = adata_dask.shape[0]
@@ -749,6 +752,7 @@ def consensus_cluster(
     k_range=(15, 150),
     la_res_range=(25, 175),
     nprocs=None,
+    mem_per_core="4GB",
     return_multires=False,
 ):
     """
@@ -792,6 +796,8 @@ def consensus_cluster(
         `multiprocessing.cpu_count()` to find number of available cores.
         This is used as a check and the minimum value between number of
         cores detected and specified number of processes is set as final value.
+    mem_per_core : str, default="4GB"
+        Maximum memory usage per core given system constraints.
     return_multires : bool, default=False
         Whether or not to add consensus results from all tested resolutions to the
         adata object. Default is `False` as this can add subtantial memory usage.
@@ -829,7 +835,8 @@ def consensus_cluster(
         ensemble_size=ensemble_size,
         k_range=k_range,
         la_res_range=la_res_range,
-        nprocs=nprocs,
+        nprocs=nprocs, 
+        mem_per_core
     )
 
     # Obtain consensus from ensemble
