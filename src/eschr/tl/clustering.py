@@ -438,10 +438,10 @@ def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig, n_features)
         ## Data subspace feature extraction
         data = run_pca_dim_reduction(data, n_features)
         ## Run leiden clustering
-        #clusters = run_la_clustering(
-        #    X=data, k=iter_k, la_res=la_res / 100, metric=metric
-        #)
-        clusters = cluster_with_louvain(data=data, n_neighbors=iter_k)
+        clusters = run_la_clustering(
+            X=data, k=iter_k, la_res=la_res / 100, metric=metric
+        )
+        #clusters = cluster_with_louvain(data=data, n_neighbors=iter_k)
 
         a = np.zeros((n_orig), dtype=np.uint8)
         a[subsample_ids] = clusters[0] + 1
