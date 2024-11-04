@@ -836,7 +836,7 @@ def consensus_cluster(
         k_range=k_range,
         la_res_range=la_res_range,
         nprocs=nprocs, 
-        mem_per_core
+        mem_per_core=mem_per_core
     )
 
     # Obtain consensus from ensemble
