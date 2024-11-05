@@ -21,10 +21,10 @@ import dask.array as da
 from dask.distributed import Client
 from dask_ml.decomposition import PCA
 import dask
-import cudf
-import cugraph
-from cuml.neighbors import NearestNeighbors
-from cugraph.community import louvain
+#import cudf
+#import cugraph
+#from cuml.neighbors import NearestNeighbors
+#from cugraph.community import louvain
 
 from ._leiden import run_la_clustering  # _base_clustering_utils _leiden
 from ._prune_features import (  # ADD BACK PRECEDING DOTS
@@ -377,7 +377,7 @@ def cluster_with_louvain(data, n_neighbors):
     # Combine the indices and cluster labels
     return parts['partition'] #cudf.DataFrame({'index': indices, 'cluster': parts['partition']})
 
-def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig, n_features):
+def run_base_clustering(args_in): #data, hyperparams_ls, subsample_ids, n_orig, n_features
     """
     Run a single iteration of leiden clustering.
 
@@ -398,7 +398,8 @@ def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig, n_features)
     try:
         # LOAD DATA
         #zarr_loc = args_in[0]
-        #hyperparams_ls = args_in[1]
+        adata_dask = args_in[0]
+        hyperparams_ls = args_in[1]
 
         #z1 = zarr.open(zarr_loc, mode="r")
         #data = coo_matrix(
@@ -407,12 +408,12 @@ def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig, n_features)
         #).tocsr()
 
         # Calculate subsample size for this ensemble member
-        #subsample_size = get_subsamp_size(data.shape[0])
+        subsample_size = get_subsamp_size(adata_dask.X.shape[0])
         # Get indices for random subsample
-        #subsample_ids = random.sample(range(data.shape[0]), subsample_size)
+        subsample_ids = random.sample(range(adata_dask.X.shape[0]), subsample_size)
         ## Subsample data
-        #n_orig = data.shape[0]  # save original number of data points
-        #data = data[subsample_ids, :]
+        n_orig = adata_dask.X.shape[0]  # save original number of data points
+        data = adata_dask.X[subsample_ids, :]
 
         # Get hyperparameters
         # scale k range for selecting number of neighbors
@@ -436,6 +437,7 @@ def run_base_clustering(data, hyperparams_ls, subsample_ids, n_orig, n_features)
                 print("Data likely needs to be preprocessed, results may be suboptimal")
 
         ## Data subspace feature extraction
+        n_features = adata_dask.X.shape[1]
         data = run_pca_dim_reduction(data, n_features)
         ## Run leiden clustering
         clusters = run_la_clustering(
@@ -628,35 +630,35 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
     #num_workers = nprocs     # Number of processes (i.e., workers)
     #threads_per_worker = 2  # Number of threads per worker
     #mem_per_core
-    client = Client(n_workers=nprocs, memory_limit=mem_per_core)
+    #client = Client(n_workers=nprocs, memory_limit=mem_per_core)
 
     # Define the sizes of subsamples
-    n = adata_dask.shape[0]
+    #n = adata_dask.shape[0]
     
-    subsample_fracs = [get_subsamp_size(n) for i in range(ensemble_size)]
+    #subsample_fracs = [get_subsamp_size(n) for i in range(ensemble_size)]
 
-    print(subsample_fracs[0:10])
+    #print(subsample_fracs[0:10])
     
     # Create a list of subsamples with different sizes
     #subsamples = [random_subsample(adata_dask, frac) for frac in subsample_fracs]
 
     # Create a list to hold clustered results
-    clustered_results = []
-    n_features = adata_dask.shape[1]
+    #clustered_results = []
+    #n_features = adata_dask.shape[1]
     # Loop over each subsample, pass indices and data to map_blocks
-    for frac in subsample_fracs:
-        # Step 1: Generate subsample data and indices
-        subsample, indices = random_subsample(adata_dask, frac)
-        
-        # Step 2: Apply clustering as a delayed task
-        result = dask.delayed(run_base_clustering)(subsample, 
-                                                hyperparams_ls=[k_range, la_res_range, metric], 
-                                                subsample_ids=indices, 
-                                                n_orig=n,
-                                                n_features=n_features
-        )
-        
-        clustered_results.append(result)
+    #for frac in subsample_fracs:
+    #    # Step 1: Generate subsample data and indices
+    #    subsample, indices = random_subsample(adata_dask, frac)
+    #    
+    #    # Step 2: Apply clustering as a delayed task
+    #    result = dask.delayed(run_base_clustering)(subsample, 
+    #                                            hyperparams_ls=[k_range, la_res_range, metric], 
+    #                                            subsample_ids=indices, 
+    #                                            n_orig=n,
+    #                                            n_features=n_features
+    #    )
+    #    
+    #    clustered_results.append(result)
     
     # Apply clustering to each subsample in parallel
     #clustered_results = [subsample.map_blocks(cluster_subsample,dtype='int64', drop_axis=1, 
@@ -664,13 +666,23 @@ def ensemble(adata_dask, reduction, metric, ensemble_size, k_range, la_res_range
     #                                          subsample_ids=subsample_ids, n_orig=n_orig) for subsample in subsamples]
 
     # Trigger parallel computation of all delayed results
-    final_results = dask.compute(*clustered_results)
+    #final_results = dask.compute(*clustered_results)
 
     # Close the client
-    client.close()
+    #client.close()
 
+    data_iterator = repeat(adata_dask, ensemble_size)
+    hyperparam_iterator = [
+        [k_range, la_res_range, metric] for x in range(ensemble_size)
+    ]
+    args = list(zip(data_iterator, hyperparam_iterator))
+
+    print("starting ensemble clustering multiprocess")
+    # out = np.array(parmap(run_base_clustering, args, nprocs=nprocs))
+    out = parmap(run_base_clustering, args, nprocs=nprocs)
+    
     try:
-        clust_out = hstack(final_results)  # [x[0] for x in out]
+        clust_out = hstack(out)  # [x[0] for x in out]
     except Exception:
         print(
             "consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])"
