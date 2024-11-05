@@ -20,6 +20,7 @@ from anndata.experimental import read_dispatched, write_dispatched, read_elem
 import dask.array as da
 from dask.distributed import Client
 from dask_ml.decomposition import PCA
+from dask_ml.cluster import KMeans
 import dask
 #import cudf
 #import cugraph
@@ -377,6 +378,11 @@ def cluster_with_louvain(data, n_neighbors):
     # Combine the indices and cluster labels
     return parts['partition'] #cudf.DataFrame({'index': indices, 'cluster': parts['partition']})
 
+def cluster_kmeans(data, k):
+    kmeans = KMeans(n_clusters=k)
+    kmeans.fit(data)
+    return kmeans.labels_
+    
 def run_base_clustering(args_in): #data, hyperparams_ls, subsample_ids, n_orig, n_features
     """
     Run a single iteration of leiden clustering.
