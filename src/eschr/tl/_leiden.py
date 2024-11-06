@@ -23,6 +23,8 @@ def get_igraph_from_adjacency(adjacency, directed=None):
     g = ig.Graph(directed=directed)
     g.add_vertices(adjacency.shape[0])  # this adds adjacency.shape[0] vertices
     g.add_edges(list(zip(sources, targets)))
+    print("weights type: " + type(weights))
+    print("weights: " + str(weights[0:10]))
     try:
         g.es["weight"] = weights
     except KeyError:
