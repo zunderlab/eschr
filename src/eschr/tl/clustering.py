@@ -121,8 +121,7 @@ def parmap(f, X, nprocs=1):
             warnings.warn(f"{x} encountered in parmap {i}th arg {X[i]}")
     return ordered_res
 
-
-def make_zarr(adata, zarr_loc):
+def make_zarr_sparse(adata, zarr_loc):
     """
     Make zarr data store.
 
@@ -133,28 +132,54 @@ def make_zarr(adata, zarr_loc):
     zarr_loc : str
         Path to save zarr store which will hold the data to be clustered.
     """
+    print("making new zarr")
     if zarr_loc == None:
-        zarr_loc = os.getcwd() + "/data_store.zarr"
-    print("storing zarr data object as " + zarr_loc)
+        zarr_loc = os.getcwd() +"/data_store.zarr"
+    # Create or open the Zarr store
+    z1 = zarr.open(zarr_loc, mode='w')
+    
     data = coo_matrix(adata.X)
-    z1 = zarr.open(zarr_loc, mode="w")
-    X = z1.create_group("X")
-    data_row = X.create_dataset(
-        name="row", shape=data.row.shape, chunks=False, dtype="int32", overwrite=True
-    )
+    X = z1.create_group('X')
+    data_row = X.create_dataset(name='row', shape=data.row.shape, chunks=False, dtype='int32', overwrite=True)
     data_row[:] = data.row
-    data_col = X.create_dataset(
-        name="col", shape=data.col.shape, chunks=False, dtype="int32", overwrite=True
-    )
+    data_col = X.create_dataset(name='col', shape=data.col.shape, chunks=False, dtype='int32', overwrite=True)
     data_col[:] = data.col
-    data_data = X.create_dataset(
-        name="data",
-        shape=data.data.shape,
-        chunks=False,
-        dtype="float32",
-        overwrite=True,
-    )
+    data_data = X.create_dataset(name='data', shape=data.data.shape, chunks=False, dtype='float32', overwrite=True)
     data_data[:] = data.data
+
+
+def make_zarr_dense(adata, zarr_loc):
+    """
+    Make zarr data store.
+
+    Parameters
+    ----------
+    adata : `anndata.AnnData`
+        AnnData object containing preprocessed data to be clustered in slot `.X`
+    zarr_loc : str
+        Path to save zarr store which will hold the data to be clustered.
+    """
+    print("making new zarr")
+    if zarr_loc == None:
+        zarr_loc = os.getcwd() +"/data_store.zarr"
+    # Create or open the Zarr store
+    z1 = zarr.open(zarr_loc, mode='w')
+    
+    row_chunks = min(5000, adata.X.shape[0])
+    col_chunks = min(5000, adata.X.shape[1])
+    chunks=(row_chunks, col_chunks)
+    shape=(adata.X.shape[0],adata.X.shape[1])
+    
+    # Create the Zarr dataset
+    zarr_dataset = z1.create_dataset("X", shape=shape, chunks=chunks, dtype="float32")
+
+    # Write the data to Zarr in chunks
+    for i in range(0, shape[0], chunks[0]):
+        # Generate or load a chunk of data
+        chunk_data = adata.X[i:i + chunks[0], :]  # For example, replace with your actual data
+    
+        # Write the chunk to the appropriate slice
+        zarr_dataset[i:i + chunks[0], :] = chunk_data
 
 
 ############################################################################### UTILS
@@ -280,20 +305,29 @@ def run_base_clustering(args_in):
         # LOAD DATA
         zarr_loc = args_in[0]
         hyperparams_ls = args_in[1]
+        sparse = hyperparams_ls[3]
 
         z1 = zarr.open(zarr_loc, mode="r")
-        data = coo_matrix(
-            (z1["X"]["data"][:], (z1["X"]["row"][:], z1["X"]["col"][:])),
-            shape=[np.max(z1["X"]["row"][:]) + 1, np.max(z1["X"]["col"][:]) + 1],
-        ).tocsr()
+
+        if sparse:
+            data_shape = [np.max(z1["X"]["row"][:]) + 1, np.max(z1["X"]["col"][:]) + 1]
+        else:
+            data_shape = [z1["X"].shape[0], z1["X"].shape[1]]
 
         # Calculate subsample size for this ensemble member
-        subsample_size = get_subsamp_size(data.shape[0])
+        subsample_size = get_subsamp_size(data_shape[0])
         # Get indices for random subsample
-        subsample_ids = random.sample(range(data.shape[0]), subsample_size)
+        subsample_ids = random.sample(range(data_shape[0]), subsample_size)
         ## Subsample data
-        n_orig = data.shape[0]  # save original number of data points
-        data = data[subsample_ids, :]
+        n_orig = data_shape[0]  # save original number of data points
+        if sparse:
+            row_idxs = np.nonzero(np.isin(z1["X"]["row"], subsample_ids))[0]
+            data = coo_matrix(
+                (z1["X"]["data"][row_idxs], (z1["X"]["row"][row_idxs], z1["X"]["col"][:])),
+                shape=[np.max(z1["X"]["row"][row_idxs]) + 1, np.max(z1["X"]["col"][:]) + 1],
+            ).tocsr()
+        else:
+            data = z1["X"][subsample_ids, :]
 
         # Get hyperparameters
         # scale k range for selecting number of neighbors
@@ -460,7 +494,7 @@ def consensus_cluster_leiden(in_args):
 ############################################################################### MAIN FUNCTIONS
 
 
-def ensemble(zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, nprocs):
+def ensemble(zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, nprocs, sparse):
     """
     Run ensemble of clusterings.
 
@@ -493,6 +527,8 @@ def ensemble(zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, 
         `multiprocessing.cpu_count()` to find number of available cores.
         This is used as a check and the minimum value between number of
         cores detected and specified number of processes is set as final value.
+    sparse : bool, default=None
+        Whether the zarr store contains a sparse matrix or not.
 
     Returns
     -------
@@ -505,7 +541,7 @@ def ensemble(zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, 
 
     data_iterator = repeat(zarr_loc, ensemble_size)
     hyperparam_iterator = [
-        [k_range, la_res_range, metric] for x in range(ensemble_size)
+        [k_range, la_res_range, metric, sparse] for x in range(ensemble_size)
     ]
     args = list(zip(data_iterator, hyperparam_iterator))
 
@@ -659,7 +695,17 @@ def consensus_cluster(
     # to test if path is valid, if data is actually there
     if os.path.exists(zarr_loc) == False:
         print("making zarr")
-        make_zarr(adata, zarr_loc)
+        if (isinstance(adata.X, csr_matrix)) or (isinstance(adata.X, coo_matrix)):
+            sparse = True
+            make_zarr_sparse(adata, zarr_loc)
+        else:
+            sparsity = 1.0 - np.count_nonzero(adata.X) / adata.X.size
+            if sparsity > 0.1:
+                sparse = True
+                make_zarr_sparse(adata, zarr_loc)
+            else:
+                sparse = False
+                make_zarr_dense(adata, zarr_loc)
 
     # Generate ensemble of base clusterings
     k_range = (int(k_range[0]), int(k_range[1]))
@@ -675,6 +721,7 @@ def consensus_cluster(
         k_range=k_range,
         la_res_range=la_res_range,
         nprocs=nprocs,
+        sparse=sparse
     )
 
     # Obtain consensus from ensemble
