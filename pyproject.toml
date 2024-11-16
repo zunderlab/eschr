@@ -23,7 +23,8 @@ dependencies = [
     "anndata", #==0.7.8
     "igraph", #==0.10.4
     "leidenalg",
-    "nmslib", #==2.1.1
+    "annoy", 
+    "sklearn-annoy",
     "numpy<=1.26.4", #>=1.22
     "pandas", #==1.5.3
     "zarr",
