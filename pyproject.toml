@@ -22,14 +22,14 @@ urls.Home-page = "https://github.com/zunderlab/eschr"
 dependencies = [
     "anndata", #==0.7.8
     "igraph", #==0.10.4
-    "leidenalg",
-    "annoy", 
+    "annoy>=1.17.0,<2.0.0", 
+    "scikit-learn>=0.24.0",
     "sklearn-annoy>=0.1.2",
     "numpy", #>=1.22
     "pandas", #==1.5.3
     "zarr",
     "scanpy",
-    "scipy",
+    "scipy>=1.11.1,<2.0.0",
     "umap-learn", #==0.5.2
     "matplotlib",
     # for debug logging (referenced from the issue template)
