@@ -24,7 +24,7 @@ dependencies = [
     "igraph", #==0.10.4
     "leidenalg",
     "annoy", 
-    "sklearn-annoy",
+    "sklearn-annoy>=0.1.2",
     "numpy", #>=1.22
     "pandas", #==1.5.3
     "zarr",
