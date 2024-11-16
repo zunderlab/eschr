@@ -25,7 +25,7 @@ dependencies = [
     "leidenalg",
     "annoy", 
     "sklearn-annoy",
-    "numpy<=1.26.4", #>=1.22
+    "numpy", #>=1.22
     "pandas", #==1.5.3
     "zarr",
     "scanpy",
