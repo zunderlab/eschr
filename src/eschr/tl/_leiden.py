@@ -1,7 +1,7 @@
 import warnings
 
 import igraph as ig
-import leidenalg as la
+#import leidenalg as la
 import numpy as np
 from scipy.sparse import coo_matrix
 
@@ -104,9 +104,7 @@ def run_la_clustering(X, k, la_res, metric="euclidean", method="sw-graph"):
     # Extract info from nearest neighbors and create iGraph object
     knn_graph = get_igraph_from_adjacency(adjacency=adjacency_sparse, directed=None)
     # get Leiden clusters
-    leiden_out = la.find_partition(
-        knn_graph, la.RBConfigurationVertexPartition, resolution_parameter=la_res
-    )
+    leiden_out = knn_graph.community_leiden("modularity", weights="weight", resolution=la_res)
     # time_leiden = time.time() - start_time
     # print ("time to run leiden clustering: " + str(time_leiden))
     return np.array([leiden_out.membership])
