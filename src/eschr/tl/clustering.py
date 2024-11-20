@@ -8,7 +8,6 @@ import traceback
 import warnings
 from itertools import repeat
 
-import leidenalg as la
 import numpy as np
 import pandas as pd
 import zarr
