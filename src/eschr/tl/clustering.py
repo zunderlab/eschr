@@ -372,6 +372,8 @@ def run_base_clustering(args_in):
 
     except Exception as ex:
         traceback.print_exception(type(ex), ex, ex.__traceback__)
+        print(np.unique(clusters))
+        print(np.unique(a))
         return ["error", data]
 
     return coo_matrix(c)
