@@ -692,22 +692,24 @@ def consensus_cluster(
     nprocs = min(int(nprocs), multiprocessing.cpu_count())
     print("Multiprocessing will use " + str(nprocs) + " cores")
 
+    # Test sparseness
+    if (isinstance(adata.X, csr_matrix)) or (isinstance(adata.X, coo_matrix)):
+        sparse = True
+    else:
+        sparsity = 1.0 - np.count_nonzero(adata.X) / adata.X.size
+        if sparsity > 0.1:
+            sparse = True
+        else:
+            sparse = False
     # Make zarr store for multiproces data access
     # NEED TO ADD SOME SORT OF CHECK FOR THIS STEP
     # to test if path is valid, if data is actually there
     if os.path.exists(zarr_loc) == False:
         print("making zarr")
-        if (isinstance(adata.X, csr_matrix)) or (isinstance(adata.X, coo_matrix)):
-            sparse = True
+        if sparse:
             make_zarr_sparse(adata, zarr_loc)
         else:
-            sparsity = 1.0 - np.count_nonzero(adata.X) / adata.X.size
-            if sparsity > 0.1:
-                sparse = True
-                make_zarr_sparse(adata, zarr_loc)
-            else:
-                sparse = False
-                make_zarr_dense(adata, zarr_loc)
+            make_zarr_dense(adata, zarr_loc)
 
     # Generate ensemble of base clusterings
     k_range = (int(k_range[0]), int(k_range[1]))
