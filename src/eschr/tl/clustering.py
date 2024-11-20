@@ -11,6 +11,7 @@ from itertools import repeat
 import numpy as np
 import pandas as pd
 import zarr
+import leidenalg as la
 from igraph import Graph
 from scipy.sparse import coo_matrix, csr_matrix, hstack
 from scipy.spatial.distance import pdist, squareform
