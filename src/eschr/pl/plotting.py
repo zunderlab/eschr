@@ -63,6 +63,7 @@ def smm_heatmap(
             for x in range(adata.obsm["soft_membership_matrix"].shape[1])
         ],
     ]
+    print(smm_plot.shape)
     # Order rows by hclust or if too large by multidimensional sort
     if adata.obsm["soft_membership_matrix"].shape[0] <= 50000:
         row_order = hierarchy.dendrogram(
