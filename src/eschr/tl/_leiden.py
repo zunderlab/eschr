@@ -1,10 +1,9 @@
 import warnings
 
 import igraph as ig
-#import leidenalg as la
+# import leidenalg as la
 import numpy as np
 from scipy.sparse import coo_matrix
-
 from sklearn_ann.kneighbors.annoy import AnnoyTransformer
 
 warnings.filterwarnings("ignore")
@@ -81,13 +80,13 @@ def run_la_clustering(X, k, la_res, metric="euclidean", method="sw-graph"):
     """
     # start_time = time.time()
     if metric == "jaccard":
-        vcount = len(X)
+        len(X)
     else:
-        vcount = X.shape[0]
+        X.shape[0]
 
     if metric == "cosine":
-        metric = "angular" #this is how annoy calls it
-    
+        metric = "angular"  # this is how annoy calls it
+
     # Get k nearest neighbors to input for clustering
     transformer = AnnoyTransformer(n_neighbors=k, metric=metric)
     adjacency_sparse = transformer.fit_transform(X)
@@ -96,10 +95,12 @@ def run_la_clustering(X, k, la_res, metric="euclidean", method="sw-graph"):
 
     # Extract info from nearest neighbors and create iGraph object
     knn_graph = get_igraph_from_adjacency(adjacency=adjacency_sparse, directed=None)
-    
+
     # get Leiden clusters
     # start_time = time.time()
-    leiden_out = knn_graph.community_leiden("modularity", weights="weight", resolution=la_res)
+    leiden_out = knn_graph.community_leiden(
+        "modularity", weights="weight", resolution=la_res
+    )
     # time_leiden = time.time() - start_time
     # print ("time to run leiden clustering: " + str(time_leiden))
     return np.array([leiden_out.membership])

@@ -56,13 +56,17 @@ def smm_heatmap(
     """
     # Prep soft membership matrix data for plotting
     # First subset to only clusters that have corresponding hard clusters
-    smm_plot = adata.obsm["soft_membership_matrix"][:,[True if x in adata.obs.hard_clusters.unique() else False for x in range(adata.obsm["soft_membership_matrix"].shape[1])]]
+    smm_plot = adata.obsm["soft_membership_matrix"][
+        :,
+        [
+            True if x in adata.obs.hard_clusters.unique() else False
+            for x in range(adata.obsm["soft_membership_matrix"].shape[1])
+        ],
+    ]
     # Order rows by hclust or if too large by multidimensional sort
     if adata.obsm["soft_membership_matrix"].shape[0] <= 50000:
         row_order = hierarchy.dendrogram(
-            hierarchy.linkage(
-                pdist(smm_plot), method="average"
-            ),
+            hierarchy.linkage(pdist(smm_plot), method="average"),
             no_plot=True,
             color_threshold=-np.inf,
         )["leaves"]
@@ -88,9 +92,7 @@ def smm_heatmap(
         squared_order=True,
         discount_outliers=True,
     )
-    smm_reordered = smm_plot[row_order, :][
-        row_col_order_dict["rows"].tolist(), :
-    ]
+    smm_reordered = smm_plot[row_order, :][row_col_order_dict["rows"].tolist(), :]
     smm_reordered = smm_reordered[:, row_col_order_dict["cols"].tolist()]
 
     # For now plot_features is not enabled because it needs some troubleshooting

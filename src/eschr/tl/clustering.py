@@ -8,10 +8,10 @@ import traceback
 import warnings
 from itertools import repeat
 
+import leidenalg as la
 import numpy as np
 import pandas as pd
 import zarr
-import leidenalg as la
 from igraph import Graph
 from scipy.sparse import coo_matrix, csr_matrix, hstack
 from scipy.spatial.distance import pdist, squareform
@@ -121,6 +121,7 @@ def parmap(f, X, nprocs=1):
             warnings.warn(f"{x} encountered in parmap {i}th arg {X[i]}")
     return ordered_res
 
+
 def make_zarr_sparse(adata, zarr_loc):
     """
     Make zarr data store.
@@ -134,17 +135,27 @@ def make_zarr_sparse(adata, zarr_loc):
     """
     print("making new zarr")
     if zarr_loc == None:
-        zarr_loc = os.getcwd() +"/data_store.zarr"
+        zarr_loc = os.getcwd() + "/data_store.zarr"
     # Create or open the Zarr store
-    z1 = zarr.open(zarr_loc, mode='w')
-    
+    z1 = zarr.open(zarr_loc, mode="w")
+
     data = coo_matrix(adata.X)
-    X = z1.create_group('X')
-    data_row = X.create_dataset(name='row', shape=data.row.shape, chunks=False, dtype='int32', overwrite=True)
+    X = z1.create_group("X")
+    data_row = X.create_dataset(
+        name="row", shape=data.row.shape, chunks=False, dtype="int32", overwrite=True
+    )
     data_row[:] = data.row
-    data_col = X.create_dataset(name='col', shape=data.col.shape, chunks=False, dtype='int32', overwrite=True)
+    data_col = X.create_dataset(
+        name="col", shape=data.col.shape, chunks=False, dtype="int32", overwrite=True
+    )
     data_col[:] = data.col
-    data_data = X.create_dataset(name='data', shape=data.data.shape, chunks=False, dtype='float32', overwrite=True)
+    data_data = X.create_dataset(
+        name="data",
+        shape=data.data.shape,
+        chunks=False,
+        dtype="float32",
+        overwrite=True,
+    )
     data_data[:] = data.data
 
 
@@ -161,25 +172,27 @@ def make_zarr_dense(adata, zarr_loc):
     """
     print("making new zarr")
     if zarr_loc == None:
-        zarr_loc = os.getcwd() +"/data_store.zarr"
+        zarr_loc = os.getcwd() + "/data_store.zarr"
     # Create or open the Zarr store
-    z1 = zarr.open(zarr_loc, mode='w')
-    
+    z1 = zarr.open(zarr_loc, mode="w")
+
     row_chunks = min(5000, adata.X.shape[0])
     col_chunks = min(5000, adata.X.shape[1])
-    chunks=(row_chunks, col_chunks)
-    shape=(adata.X.shape[0],adata.X.shape[1])
-    
+    chunks = (row_chunks, col_chunks)
+    shape = (adata.X.shape[0], adata.X.shape[1])
+
     # Create the Zarr dataset
     zarr_dataset = z1.create_dataset("X", shape=shape, chunks=chunks, dtype="float32")
 
     # Write the data to Zarr in chunks
     for i in range(0, shape[0], chunks[0]):
         # Generate or load a chunk of data
-        chunk_data = adata.X[i:i + chunks[0], :]  # For example, replace with your actual data
-    
+        chunk_data = adata.X[
+            i : i + chunks[0], :
+        ]  # For example, replace with your actual data
+
         # Write the chunk to the appropriate slice
-        zarr_dataset[i:i + chunks[0], :] = chunk_data
+        zarr_dataset[i : i + chunks[0], :] = chunk_data
 
 
 ############################################################################### UTILS
@@ -323,8 +336,14 @@ def run_base_clustering(args_in):
         if sparse:
             row_idxs = np.nonzero(np.isin(z1["X"]["row"], subsample_ids))[0]
             data = coo_matrix(
-                (z1["X"]["data"][row_idxs], (z1["X"]["row"][row_idxs], z1["X"]["col"][:])),
-                shape=[np.max(z1["X"]["row"][row_idxs]) + 1, np.max(z1["X"]["col"][:]) + 1],
+                (
+                    z1["X"]["data"][row_idxs],
+                    (z1["X"]["row"][row_idxs], z1["X"]["col"][:]),
+                ),
+                shape=[
+                    np.max(z1["X"]["row"][row_idxs]) + 1,
+                    np.max(z1["X"]["col"][:]) + 1,
+                ],
             ).tocsr()
         else:
             data = z1["X"][subsample_ids, :]
@@ -496,7 +515,9 @@ def consensus_cluster_leiden(in_args):
 ############################################################################### MAIN FUNCTIONS
 
 
-def ensemble(zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, nprocs, sparse):
+def ensemble(
+    zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, nprocs, sparse
+):
     """
     Run ensemble of clusterings.
 
@@ -725,7 +746,7 @@ def consensus_cluster(
         k_range=k_range,
         la_res_range=la_res_range,
         nprocs=nprocs,
-        sparse=sparse
+        sparse=sparse,
     )
 
     # Obtain consensus from ensemble
