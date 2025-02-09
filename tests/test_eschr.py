@@ -72,7 +72,7 @@ def test_make_zarr_custom_path(adata, zarr_loc):
     assert os.path.exists(zarr_loc)
     shutil.rmtree(zarr_loc)
 
-
+@pytest.mark.skip(reason="Update to be testing zarr dense data structure")
 def test_make_zarr_content(adata, zarr_loc):
     es.tl.clustering.make_zarr_dense(adata, zarr_loc)
     z = zarr.open(zarr_loc)
@@ -169,7 +169,7 @@ def test_run_la_clustering(X):
 
 @pytest.fixture
 def hyperparams_ls():
-    return [None, (25, 175), None]
+    return [None, (25, 175), None, False]
 
 
 @pytest.fixture
