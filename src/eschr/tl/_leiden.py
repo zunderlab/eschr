@@ -1,11 +1,10 @@
 import warnings
 
 import igraph as ig
-#import leidenalg as la
+# import leidenalg as la
 import numpy as np
 from scipy.sparse import coo_matrix
-
-from ._knn_utils import NMSlibTransformer
+from sklearn_ann.kneighbors.annoy import AnnoyTransformer
 
 warnings.filterwarnings("ignore")
 ########################################################################################################################################################
@@ -23,8 +22,6 @@ def get_igraph_from_adjacency(adjacency, directed=None):
     g = ig.Graph(directed=directed)
     g.add_vertices(adjacency.shape[0])  # this adds adjacency.shape[0] vertices
     g.add_edges(list(zip(sources, targets)))
-    print("weights type: " + str(type(weights)))
-    print("weights: " + str(weights[0:10]))
     try:
         g.es["weight"] = weights
     except KeyError:
@@ -83,28 +80,27 @@ def run_la_clustering(X, k, la_res, metric="euclidean", method="sw-graph"):
     """
     # start_time = time.time()
     if metric == "jaccard":
-        vcount = len(X)
+        len(X)
     else:
-        vcount = X.shape[0]
+        X.shape[0]
+
+    if metric == "cosine":
+        metric = "angular"  # this is how annoy calls it
+
     # Get k nearest neighbors to input for clustering
-    nbrs = NMSlibTransformer(
-        n_neighbors=k, metric=metric, method=method
-    )  # .fit_transform(ds_sub)
-
-    knn_indices, knn_distances = nbrs.fit_transform(X)  # nbrs.kneighbors(ds_sub)
-
-    adjacency_sparse = _get_sparse_matrix_from_indices_distances_umap(
-        knn_indices=knn_indices, knn_dists=knn_distances, n_obs=vcount, n_neighbors=k
-    )
-
+    transformer = AnnoyTransformer(n_neighbors=k, metric=metric)
+    adjacency_sparse = transformer.fit_transform(X)
     # time_leiden = time.time() - start_time
     # print ("time to run nearest neighbors: " + str(time_leiden))
 
-    # start_time = time.time()
     # Extract info from nearest neighbors and create iGraph object
     knn_graph = get_igraph_from_adjacency(adjacency=adjacency_sparse, directed=None)
+
     # get Leiden clusters
-    leiden_out = knn_graph.community_leiden("modularity", weights="weight", resolution=la_res)
+    # start_time = time.time()
+    leiden_out = knn_graph.community_leiden(
+        "modularity", weights="weight", resolution=la_res
+    )
     # time_leiden = time.time() - start_time
     # print ("time to run leiden clustering: " + str(time_leiden))
     return np.array([leiden_out.membership])

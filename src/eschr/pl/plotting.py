@@ -55,20 +55,26 @@ def smm_heatmap(
         Path specifying where to save the plot. If none, plot is not saved.
     """
     # Prep soft membership matrix data for plotting
+    # First subset to only clusters that have corresponding hard clusters
+    smm_plot = adata.obsm["soft_membership_matrix"][
+        :,
+        [
+            True if x in adata.obs.hard_clusters.unique() else False
+            for x in range(adata.obsm["soft_membership_matrix"].shape[1])
+        ],
+    ]
     # Order rows by hclust or if too large by multidimensional sort
     if adata.obsm["soft_membership_matrix"].shape[0] <= 50000:
         row_order = hierarchy.dendrogram(
-            hierarchy.linkage(
-                pdist(adata.obsm["soft_membership_matrix"]), method="average"
-            ),
+            hierarchy.linkage(pdist(smm_plot), method="average"),
             no_plot=True,
             color_threshold=-np.inf,
         )["leaves"]
     else:
         smm_with_index = np.insert(
-            adata.obsm["soft_membership_matrix"],
+            smm_plot,
             0,
-            list(range(adata.obsm["soft_membership_matrix"].shape[0])),
+            list(range(smm_plot.shape[0])),
             axis=1,
         )
         # Sort the list using sorted() function
@@ -80,15 +86,13 @@ def smm_heatmap(
         row_order = np.array(sorted_list)[:, 0].astype(int).tolist()
     # Re-order clusters to fall along the diagonal for easier visual interpretation
     row_col_order_dict = slanted_orders(
-        adata.obsm["soft_membership_matrix"][row_order, :],
+        smm_plot[row_order, :],
         order_rows=False,
         order_cols=True,
         squared_order=True,
         discount_outliers=True,
     )
-    smm_reordered = adata.obsm["soft_membership_matrix"][row_order, :][
-        row_col_order_dict["rows"].tolist(), :
-    ]
+    smm_reordered = smm_plot[row_order, :][row_col_order_dict["rows"].tolist(), :]
     smm_reordered = smm_reordered[:, row_col_order_dict["cols"].tolist()]
 
     # For now plot_features is not enabled because it needs some troubleshooting

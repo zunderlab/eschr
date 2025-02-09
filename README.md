@@ -22,9 +22,11 @@ This [example jupyter notebook on Google Colab](https://github.com/zunderlab/esc
 ## Installation
 
 ### Quick install
+
 `pip install eschr`
 
 ### Detailed installation instructions
+
 You need to have a Python version between 3.8 and 3.10 (inclusive) installed on your system. If you don't have
 Python installed, we recommend installing [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge).
 (_If you are installing on a Windows OS, you will need to use python version 3.8 only due to issues with installing the nmslib dependency in other versions_)
@@ -38,8 +40,7 @@ Python installed, we recommend installing [Mambaforge](https://github.com/conda-
    `pip install git+https://github.com/zunderlab/eschr.git`
    or to install teh latest release, run:
    `pip install eschr`
-8. Verify that the Conda environment was created successfully by running `conda list` and verifying that expected packages are installed for this environment. Then either close the environment by running `conda deactivate` or proceed to subsequent optional setup and/or running the method within the environment.
-
+7. Verify that the Conda environment was created successfully by running `conda list` and verifying that expected packages are installed for this environment. Then either close the environment by running `conda deactivate` or proceed to subsequent optional setup and/or running the method within the environment.
 
 ## Basic example run script:
 
