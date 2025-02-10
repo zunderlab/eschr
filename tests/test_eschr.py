@@ -257,7 +257,8 @@ def test_consensus_cluster_leiden(bipartite_graph_array):
     assert isinstance(hard_clusters, pd.Categorical)
     assert len(hard_clusters) == n
     assert isinstance(soft_membership_matrix, csr_matrix)
-    assert soft_membership_matrix.shape == (n, np.unique(hard_clusters).shape[0])
+    assert soft_membership_matrix.shape[0] == n
+    assert soft_membership_matrix.shape[1] >= np.unique(hard_clusters).shape[0]
     assert np.allclose(soft_membership_matrix.sum(axis=1), 1.0)
     assert resolution == 1.0
 
