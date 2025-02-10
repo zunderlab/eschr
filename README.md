@@ -1,11 +1,8 @@
 # ESCHR
 
 [![Documentation][badge-docs]][link-docs]
-[![codecov](https://codecov.io/gh/zunderlab/eschr/branch/main/graph/badge.svg)](https://codecov.io/gh/zunderlab/eschr)
-
-[badge-tests]: https://img.shields.io/github/actions/workflow/status/zunderlab/eschr/test.yaml?branch=main
-[link-tests]: https://github.com/zunderlab/eschr/actions/workflows/test.yml
-[badge-docs]: https://img.shields.io/readthedocs/eschr
+[![Tests][badge-tests]][link-tests]
+[![Build][badge-build]][link-build]
 
 ESCHR: A hyperparameter-randomized ensemble approach for robust clustering across diverse datasets
 
@@ -134,7 +131,12 @@ If you found a bug, please use the [issue tracker][issue-tracker].
 
     Goggin, S.M., Zunder, E.R. ESCHR: a hyperparameter-randomized ensemble approach for robust clustering across diverse datasets. Genome Biol 25, 242 (2024). https://doi.org/10.1186/s13059-024-03386-5
 
+[badge-tests]: https://img.shields.io/github/actions/workflow/status/zunderlab/eschr/test.yaml?branch=main
+[link-tests]: https://github.com/zunderlab/eschr/actions/workflows/test.yaml
+[badge-build]: https://img.shields.io/github/actions/workflow/status/zunderlab/eschr/build.yaml?branch=main
+[link-build]: https://github.com/zunderlab/eschr/actions/workflows/build.yaml
+[badge-docs]: https://img.shields.io/readthedocs/eschr
+[link-docs]: https://eschr.readthedocs.io
 [issue-tracker]: https://github.com/zunderlab/eschr/issues
 [changelog]: https://eschr.readthedocs.io/latest/changelog.html
-[link-docs]: https://eschr.readthedocs.io
 [link-api]: https://eschr.readthedocs.io/latest/api.html
