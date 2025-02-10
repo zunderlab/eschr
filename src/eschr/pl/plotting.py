@@ -59,7 +59,7 @@ def smm_heatmap(
     smm_plot = adata.obsm["soft_membership_matrix"][
         :,
         [
-            True if x in adata.obs.hard_clusters.unique() else False
+            True if x in adata.obs.hard_clusters.astype(int).unique() else False
             for x in range(adata.obsm["soft_membership_matrix"].shape[1])
         ],
     ]
