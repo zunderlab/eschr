@@ -131,7 +131,7 @@ If you found a bug, please use the [issue tracker][issue-tracker].
 
     Goggin, S.M., Zunder, E.R. ESCHR: a hyperparameter-randomized ensemble approach for robust clustering across diverse datasets. Genome Biol 25, 242 (2024). https://doi.org/10.1186/s13059-024-03386-5
 
-[badge-tests]: https://img.shields.io/github/actions/workflow/status/zunderlab/eschr/test.yaml?branch=main
+[badge-tests]: https://github.com/zunderlab/eschr/actions/workflows/test.yaml/badge.svg
 [link-tests]: https://github.com/zunderlab/eschr/actions/workflows/test.yaml
 [badge-build]: https://img.shields.io/github/actions/workflow/status/zunderlab/eschr/build.yaml?branch=main
 [link-build]: https://github.com/zunderlab/eschr/actions/workflows/build.yaml
