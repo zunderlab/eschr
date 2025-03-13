@@ -60,6 +60,9 @@ test = [
     "pytest",
     "pytest-cov",
 ]
+gpu = [ "cupy" ]
+cu12 = [ "cupy-cuda12x" ]
+cu11 = [ "cupy-cuda11x" ]
 
 [tool.hatch.build.targets.wheel]
 packages = ['src/eschr']
