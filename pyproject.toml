@@ -63,6 +63,7 @@ test = [
 gpu = [ "cupy" ]
 cu12 = [ "cupy-cuda12x" ]
 cu11 = [ "cupy-cuda11x" ]
+rapids = [ "cudf>=0.9", "cuml>=0.9", "cugraph>=0.9" ] # GPU accelerated calculation of neighbors
 
 [tool.hatch.build.targets.wheel]
 packages = ['src/eschr']
