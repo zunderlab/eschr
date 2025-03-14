@@ -315,11 +315,13 @@ def run_base_clustering(args_in):
         of data point per cluster.
     """
     try:
-        # LOAD DATA
+        # Process args
         zarr_loc = args_in[0]
-        hyperparams_ls = args_in[1]
-        sparse = hyperparams_ls[3]
+        sparse = args_in[1]
+        use_gpu = args_in[2]
+        hyperparams_ls = args_in[3]
 
+        # LOAD DATA
         z1 = zarr.open(zarr_loc, mode="r")
 
         if sparse:
@@ -516,7 +518,7 @@ def consensus_cluster_leiden(in_args):
 
 
 def ensemble(
-    zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, nprocs, sparse
+    zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, nprocs, sparse, use_gpu
 ):
     """
     Run ensemble of clusterings.
@@ -552,6 +554,8 @@ def ensemble(
         cores detected and specified number of processes is set as final value.
     sparse : bool, default=None
         Whether the zarr store contains a sparse matrix or not.
+    use_gpu : bool, default=False
+        Whether to use rapids-cuda gpu methods.
 
     Returns
     -------
@@ -563,10 +567,12 @@ def ensemble(
     start_time = time.perf_counter()
 
     data_iterator = repeat(zarr_loc, ensemble_size)
+    sparse_iterator = repeat(sparse, ensemble_size)
+    use_gpu_iterator = repeat(use_gpu, ensemble_size)
     hyperparam_iterator = [
-        [k_range, la_res_range, metric, sparse] for x in range(ensemble_size)
+        [k_range, la_res_range, metric] for x in range(ensemble_size)
     ]
-    args = list(zip(data_iterator, hyperparam_iterator))
+    args = list(zip(data_iterator, sparse_iterator, use_gpu_iterator, hyperparam_iterator))
 
     print("starting ensemble clustering multiprocess")
     # out = np.array(parmap(run_base_clustering, args, nprocs=nprocs))
@@ -656,6 +662,7 @@ def consensus_cluster(
     la_res_range=(25, 175),
     nprocs=None,
     return_multires=False,
+    use_gpu=False
 ):
     """
     Run ensemble of clusterings and find consensus.
@@ -701,6 +708,8 @@ def consensus_cluster(
     return_multires : bool, default=False
         Whether or not to add consensus results from all tested resolutions to the
         adata object. Default is `False` as this can add subtantial memory usage.
+    use_gpu : bool, default=False
+        Whether to use rapids-cuda gpu methods.
 
     Returns
     -------
@@ -747,6 +756,7 @@ def consensus_cluster(
         la_res_range=la_res_range,
         nprocs=nprocs,
         sparse=sparse,
+        use_gpu=use_gpu
     )
 
     # Obtain consensus from ensemble
