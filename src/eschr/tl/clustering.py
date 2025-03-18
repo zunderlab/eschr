@@ -295,7 +295,35 @@ def run_pca_dim_reduction(X):
     X_pca = np.array(calc_pca(X))
     return X_pca
 
+def run_pca_dim_reduction_rapids(X):
+    """
+    Produce PCA-reduced data matrix.
 
+    Generates a dimensionality-reduced data matrix through
+    PCA feature extraction. Other methods of feature extraction
+    and selection will be included in future releases.
+
+    Parameters
+    ----------
+    X : :class:`~numpy.array` or :class:`~scipy.sparse.spmatrix`
+        Data matrix of shape `n_obs` × `n_vars`. Rows correspond
+        to cells (or other instance type) and columns to genes (or other feature type).
+
+    Returns
+    -------
+    X_pca : :class:`~numpy.array` or :class:`~scipy.sparse.spmatrix`
+        Data matrix of shape `n_obs` × `n_pcs`. Rows correspond
+        to cells and columns to PCA-extracted features.
+    """
+    time.time()
+    if X.shape[1] > 6000:  # somewhat arbitrary cutoff, come up with better heuristic?
+        rsc.pp.highly_variable_genes(
+            adata, n_top_genes=5000, flavor="seurat_v3", layer="counts"
+        )
+        X = X[:, bool_features]
+    X_pca = np.array(calc_pca(X))
+    return X_pca
+    
 def run_base_clustering(args_in):
     """
     Run a single iteration of leiden clustering.
@@ -371,12 +399,20 @@ def run_base_clustering(args_in):
             if np.max(data) > 20:
                 print("Data likely needs to be preprocessed, results may be suboptimal")
 
-        ## Data subspace feature extraction
-        data = run_pca_dim_reduction(data)
-        ## Run leiden clustering
-        clusters = run_la_clustering(
-            X=data, k=iter_k, la_res=la_res / 100, metric=metric
-        )
+        if use_gpu:
+            ## Data subspace feature extraction
+            data = run_pca_dim_reduction(data)
+            ## Run leiden clustering
+            clusters = run_la_clustering(
+                X=data, k=iter_k, la_res=la_res / 100, metric=metric
+            )
+        else:
+            ## Data subspace feature extraction
+            data = run_pca_dim_reduction(data)
+            ## Run leiden clustering
+            clusters = run_la_clustering(
+                X=data, k=iter_k, la_res=la_res / 100, metric=metric
+            )
         ## Prepare outputs for this ensemble member
         len(np.unique(clusters))
         a = np.zeros((n_orig), dtype=np.uint8)
@@ -566,25 +602,30 @@ def ensemble(
     """
     start_time = time.perf_counter()
 
-    data_iterator = repeat(zarr_loc, ensemble_size)
-    sparse_iterator = repeat(sparse, ensemble_size)
-    use_gpu_iterator = repeat(use_gpu, ensemble_size)
-    hyperparam_iterator = [
-        [k_range, la_res_range, metric] for x in range(ensemble_size)
-    ]
-    args = list(zip(data_iterator, sparse_iterator, use_gpu_iterator, hyperparam_iterator))
+    if not use_gpu:
+        data_iterator = repeat(zarr_loc, ensemble_size)
+        sparse_iterator = repeat(sparse, ensemble_size)
+        use_gpu_iterator = repeat(use_gpu, ensemble_size)
+        hyperparam_iterator = [
+            [k_range, la_res_range, metric] for x in range(ensemble_size)
+        ]
+        args = list(zip(data_iterator, sparse_iterator, use_gpu_iterator, hyperparam_iterator))
+    
+        print("starting ensemble clustering multiprocess")
+        # out = np.array(parmap(run_base_clustering, args, nprocs=nprocs))
+        out = parmap(run_base_clustering, args, nprocs=nprocs)
+    
+        try:
+            clust_out = hstack(out)  # [x[0] for x in out]
+        except Exception:
+            print(
+                "consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])"
+            )
 
-    print("starting ensemble clustering multiprocess")
-    # out = np.array(parmap(run_base_clustering, args, nprocs=nprocs))
-    out = parmap(run_base_clustering, args, nprocs=nprocs)
+    else:
 
-    try:
-        clust_out = hstack(out)  # [x[0] for x in out]
-    except Exception:
-        print(
-            "consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])"
-        )
 
+        
     finish_time = time.perf_counter()
     print(f"Ensemble clustering finished in {finish_time-start_time} seconds")
 
