@@ -6,6 +6,7 @@ import warnings
 
 import igraph as ig
 import leidenalg as la
+import zarr
 import numpy as np
 from scipy.sparse import coo_matrix
 from sklearn_ann.kneighbors.annoy import AnnoyTransformer
