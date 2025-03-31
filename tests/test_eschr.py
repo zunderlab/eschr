@@ -53,7 +53,7 @@ def zarr_loc():
 
 @pytest.fixture
 def zarr_loc_static(adata):
-    es.tl.clustering.make_zarr_dense(adata, "data/test_data_static.zarr")
+    es.tl._zarr_utils.make_zarr_dense(adata, "data/test_data_static.zarr")
     return "data/test_data_static.zarr"
 
 
@@ -62,19 +62,19 @@ def zarr_loc_static(adata):
 
 # make_zarr
 def test_make_zarr_default(adata):
-    es.tl.clustering.make_zarr_dense(adata, None)
+    es.tl._zarr_utils.make_zarr_dense(adata, None)
     assert os.path.exists("data_store.zarr")
     shutil.rmtree("data_store.zarr")
 
 
 def test_make_zarr_custom_path(adata, zarr_loc):
-    es.tl.clustering.make_zarr_dense(adata, zarr_loc)
+    es.tl._zarr_utils.make_zarr_dense(adata, zarr_loc)
     assert os.path.exists(zarr_loc)
     shutil.rmtree(zarr_loc)
 
 @pytest.mark.skip(reason="Update to be testing zarr dense data structure")
 def test_make_zarr_content(adata, zarr_loc):
-    es.tl.clustering.make_zarr_dense(adata, zarr_loc)
+    es.tl._zarr_utils.make_zarr_dense(adata, zarr_loc)
     z = zarr.open(zarr_loc)
     X = z["X"]
     adata_X_coo = coo_matrix(adata.X)
@@ -90,35 +90,35 @@ def test_get_subsamp_size():
     n = 10
     subsample_size_10 = []
     for i in range(1000):
-        subsample_size_10.append(es.tl.clustering.get_subsamp_size(n))
+        subsample_size_10.append(es.tl._clustering.get_subsamp_size(n))
     subsample_frac_10 = np.mean(subsample_size_10) / n
 
     # Test with small n
     n = 500
     subsample_size_500 = []
     for i in range(1000):
-        subsample_size_500.append(es.tl.clustering.get_subsamp_size(n))
+        subsample_size_500.append(es.tl._clustering.get_subsamp_size(n))
     subsample_frac_500 = np.mean(subsample_size_500) / n
 
     # Test with medium n
     n = 50000
     subsample_size_50k = []
     for i in range(1000):
-        subsample_size_50k.append(es.tl.clustering.get_subsamp_size(n))
+        subsample_size_50k.append(es.tl._clustering.get_subsamp_size(n))
     subsample_frac_50k = np.mean(subsample_size_50k) / n
 
     # Test with large n
     n = 1000000
     subsample_size_1mil = []
     for i in range(1000):
-        subsample_size_1mil.append(es.tl.clustering.get_subsamp_size(n))
+        subsample_size_1mil.append(es.tl._clustering.get_subsamp_size(n))
     subsample_frac_1mil = np.mean(subsample_size_1mil) / n
 
     # Test extreme large n
     n = 100000000
     subsample_size_100mil = []
     for i in range(1000):
-        subsample_size_100mil.append(es.tl.clustering.get_subsamp_size(n))
+        subsample_size_100mil.append(es.tl._clustering.get_subsamp_size(n))
     subsample_frac_100mil = np.mean(subsample_size_100mil) / n
 
     assert subsample_frac_10 > subsample_frac_500
@@ -131,7 +131,7 @@ def test_get_subsamp_size():
 def test_get_hyperparameters():
     k_range = (15, 150)
     la_res_range = (25, 175)
-    k, la_res, metric = es.tl.clustering.get_hyperparameters(k_range, la_res_range)
+    k, la_res, metric = es.tl._clustering.get_hyperparameters(k_range, la_res_range)
     assert k_range[0] <= k <= k_range[1]
     assert la_res_range[0] <= la_res <= la_res_range[1]
     assert metric in ["euclidean", "cosine"]
@@ -141,10 +141,10 @@ def test_get_hyperparameters_random_seed():
     random.seed(42)
     k_range = (15, 150)
     la_res_range = (25, 175)
-    k1, la_res1, metric1 = es.tl.clustering.get_hyperparameters(k_range, la_res_range)
+    k1, la_res1, metric1 = es.tl._clustering.get_hyperparameters(k_range, la_res_range)
 
     random.seed(42)
-    k2, la_res2, metric2 = es.tl.clustering.get_hyperparameters(k_range, la_res_range)
+    k2, la_res2, metric2 = es.tl._clustering.get_hyperparameters(k_range, la_res_range)
 
     assert k1 == k2
     assert la_res1 == la_res2
@@ -153,7 +153,7 @@ def test_get_hyperparameters_random_seed():
 
 # run_pca_dim_reduction
 def test_run_pca_dim_reduction(X):
-    X_pca = es.tl.clustering.run_pca_dim_reduction(X)
+    X_pca = es.tl._prune_features.run_pca_dim_reduction(X)
     assert X_pca.shape[1] < X.shape[1]
     assert X_pca.shape[0] == X.shape[0]
 
@@ -162,7 +162,7 @@ def test_run_pca_dim_reduction(X):
 def test_run_la_clustering(X):
     k = 15
     la_res = 1.0
-    result = es.tl._leiden.run_la_clustering(X, k, la_res)
+    result = es.tl._clustering.run_la_clustering(X, k, la_res)
     assert isinstance(result, np.ndarray)
     assert result.shape[1] == X.shape[0]
 
@@ -178,7 +178,7 @@ def args_in(zarr_loc_static, hyperparams_ls):
 
 
 def test_run_base_clustering_valid_input(args_in):
-    result = es.tl.clustering.run_base_clustering(args_in)
+    result = es.tl._clustering.run_base_clustering(args_in)
     assert isinstance(result, coo_matrix)
 
 
@@ -212,7 +212,7 @@ def setup_data(bipartite_graph_array):
 
 def test_get_hard_soft_clusters(setup_data):
     n, clustering, bg = setup_data
-    hard_clusters, soft_membership_matrix = es.tl.clustering.get_hard_soft_clusters(
+    hard_clusters, soft_membership_matrix = es.tl._clustering.get_hard_soft_clusters(
         n, clustering, bg
     )
 
@@ -232,7 +232,7 @@ def test_get_hard_soft_clusters(setup_data):
 def test_get_hard_soft_clusters_single_cluster(setup_data):
     n, clustering, bg = setup_data
     clustering = np.zeros(clustering.shape[0])
-    hard_clusters, soft_membership_matrix = es.tl.clustering.get_hard_soft_clusters(
+    hard_clusters, soft_membership_matrix = es.tl._clustering.get_hard_soft_clusters(
         n, clustering, bg
     )
 
@@ -252,7 +252,7 @@ def test_consensus_cluster_leiden(bipartite_graph_array):
         hard_clusters,
         soft_membership_matrix,
         resolution,
-    ) = es.tl.clustering.consensus_cluster_leiden(in_args)
+    ) = es.tl._clustering.consensus_cluster_leiden(in_args)
 
     assert isinstance(hard_clusters, pd.Categorical)
     assert len(hard_clusters) == n
