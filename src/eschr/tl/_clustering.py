@@ -5,7 +5,7 @@ import traceback
 import warnings
 
 import igraph as ig
-# import leidenalg as la
+import leidenalg as la
 import numpy as np
 from scipy.sparse import coo_matrix
 from sklearn_ann.kneighbors.annoy import AnnoyTransformer
