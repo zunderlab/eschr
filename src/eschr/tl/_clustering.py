@@ -8,6 +8,7 @@ import igraph as ig
 import leidenalg as la
 import zarr
 import numpy as np
+import pandas as pd
 from scipy.sparse import coo_matrix
 from sklearn_ann.kneighbors.annoy import AnnoyTransformer
 
