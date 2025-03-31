@@ -1,4 +1,5 @@
 """Feature selection and dimensionality reduction functions."""
+import time
 import warnings
 from typing import Optional
 
