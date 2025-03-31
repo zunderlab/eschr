@@ -9,6 +9,82 @@ from sklearn_ann.kneighbors.annoy import AnnoyTransformer
 from ._prune_features import run_pca_dim_reduction
 
 warnings.filterwarnings("ignore")
+
+########################################################################################################################################################
+# Hyperparameter Utils
+########################################################################################################################################################
+
+def get_subsamp_size(n):  # n==data.shape[0]
+    """
+    Generate subsample size.
+
+    Calculates subsample size for a single clustering.
+    Value is chosen from a gaussian whose center is set
+    based on the number of data points/instances/cells
+    in the dataset.
+
+    Parameters
+    ----------
+    n : int
+        Number of data points/instances/cells.
+
+    Returns
+    -------
+    subsample_size : int
+        The number of data points/instances/cells to sample.
+    """
+    oom = math.ceil(n / 1000)
+    # print(oom)
+    if oom > 1000:  # aka more than 1 mil data points
+        mu = 30
+    elif oom == 1:  # aka fewer than 1000 data points
+        mu = 90
+    else:
+        oom = 1000 - oom  # so that it scales in the appropriate direction
+        mu = ((oom - 1) / (1000 - 1)) * (90 - 30) + 30
+    subsample_ratio = random.gauss(mu=mu, sigma=10)
+    while subsample_ratio >= 100 or subsample_ratio < 10:
+        subsample_ratio = random.gauss(mu=mu, sigma=10)
+    ## Calculate subsample size
+    subsample_size = math.ceil((subsample_ratio / 100) * n)
+    return subsample_size
+
+
+## Get hyperparameters
+def get_hyperparameters(k_range, la_res_range, metric=None):
+    """
+    Calculate hyperparameters for a single clustering.
+
+    Parameters
+    ----------
+    k_range : tuple of (int, int)
+        Upper and lower limits for selecting random k for neighborhood
+        graph construction.
+    la_res_range : tuple of (int, int)
+        Upper and lower limits for selecting random resolution
+        parameter for leiden community detection.
+    metric : {‘euclidean’, ‘cosine’, None}, optional
+        Which distance metric to use for calculating kNN graph for clustering.
+        For now, one of ('cosine', 'euclidean'), plan to add
+        correlation when I can find a fast enough implementation.
+
+    Returns
+    -------
+    k : int
+        Number of neighbors for neighborhood graph construction.
+    la_res : int
+        Resolution parameter for leiden community detection.
+    metric : str
+        Which distance metric to use for calculating kNN graph for clustering.
+        For now, one of ('cosine', 'euclidean'), plan to add
+        correlation when I can find a fast enough implementation.
+    """
+    k = random.sample(range(k_range[0], k_range[1]), 1)[0]
+    la_res = random.sample(range(la_res_range[0], la_res_range[1]), 1)[0]
+    if metric is None:
+        metric = ["euclidean", "cosine"][random.sample(range(2), 1)[0]]
+    return k, la_res, metric
+
 ########################################################################################################################################################
 # Clustering Utils
 ########################################################################################################################################################
@@ -81,6 +157,10 @@ def run_la_clustering(X, k, la_res, metric="euclidean", method="sw-graph"):
     # time_leiden = time.time() - start_time
     # print ("time to run leiden clustering: " + str(time_leiden))
     return np.array([leiden_out.membership])
+
+########################################################################################################################################################
+# Main clustering
+########################################################################################################################################################
 
 def run_base_clustering(args_in):
     """
