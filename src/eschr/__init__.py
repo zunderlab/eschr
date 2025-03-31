@@ -1,7 +1,7 @@
 from importlib.metadata import version
 
-from . import pl, readwrite, tl
+from . import pl, tl
 
-__all__ = ["pl", "tl", "readwrite"]
+__all__ = ["pl", "tl"]
 
 __version__ = version("eschr")
