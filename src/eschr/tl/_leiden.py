@@ -31,31 +31,6 @@ def get_igraph_from_adjacency(adjacency, directed=None):
     return g
 
 
-# Util adapted from scanpy:
-def _get_sparse_matrix_from_indices_distances_umap(
-    knn_indices, knn_dists, n_obs, n_neighbors
-):
-    rows = np.zeros((n_obs * knn_indices.shape[1]), dtype=np.int64)  # n_neighbors
-    cols = np.zeros((n_obs * knn_indices.shape[1]), dtype=np.int64)  # n_neighbors
-    vals = np.zeros((n_obs * knn_indices.shape[1]), dtype=np.float64)  # n_neighbors
-
-    for i in range(knn_indices.shape[0]):
-        for j in range(knn_indices.shape[1]):  # n_neighbors
-            if knn_indices[i, j] == -1:
-                continue  # We didn't get the full knn for i
-            if knn_indices[i, j] == i:
-                val = 0.0
-            else:
-                val = knn_dists[i, j]
-
-            rows[i * knn_indices.shape[1] + j] = i  # n_neighbors
-            cols[i * knn_indices.shape[1] + j] = knn_indices[i, j]  # n_neighbors
-            vals[i * knn_indices.shape[1] + j] = val  # n_neighbors
-    result = coo_matrix((vals, (rows, cols)), shape=(n_obs, n_obs))
-    result.eliminate_zeros()
-    return result.tocsr()
-
-
 def run_la_clustering(X, k, la_res, metric="euclidean", method="sw-graph"):
     """
     Find consensus from ensemble of clusterings.
