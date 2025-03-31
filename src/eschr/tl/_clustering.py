@@ -1,13 +1,12 @@
 import math
 import random
-import time
 import traceback
 import warnings
 
 import igraph as ig
 import leidenalg as la
-import zarr
 import numpy as np
+import zarr
 from scipy.sparse import coo_matrix
 from sklearn_ann.kneighbors.annoy import AnnoyTransformer
 
@@ -18,6 +17,7 @@ warnings.filterwarnings("ignore")
 ########################################################################################################################################################
 # Hyperparameter Utils
 ########################################################################################################################################################
+
 
 def get_subsamp_size(n):  # n==data.shape[0]
     """
@@ -89,6 +89,7 @@ def get_hyperparameters(k_range, la_res_range, metric=None):
     if metric is None:
         metric = ["euclidean", "cosine"][random.sample(range(2), 1)[0]]
     return k, la_res, metric
+
 
 ########################################################################################################################################################
 # Clustering Utils
@@ -163,6 +164,7 @@ def run_la_clustering(X, k, la_res, metric="euclidean", method="sw-graph"):
     # print ("time to run leiden clustering: " + str(time_leiden))
     return np.array([leiden_out.membership])
 
+
 def get_hard_soft_clusters(n, clustering, bg):
     """
     Generate hard and soft clusters for a single bipartite clustering.
@@ -202,9 +204,11 @@ def get_hard_soft_clusters(n, clustering, bg):
     soft_membership_matrix = clust_occ_arr / clust_occ_arr.sum(axis=1, keepdims=True)
     return hard_clusters, soft_membership_matrix
 
+
 ########################################################################################################################################################
 # Main clustering
 ########################################################################################################################################################
+
 
 def run_base_clustering(args_in):
     """

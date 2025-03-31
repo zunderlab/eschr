@@ -1,8 +1,8 @@
 import os
-import traceback
-import warnings
+
 import zarr
 from scipy.sparse import coo_matrix
+
 
 def make_zarr_sparse(adata, zarr_loc):
     """
