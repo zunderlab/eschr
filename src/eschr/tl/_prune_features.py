@@ -330,3 +330,31 @@ def calc_pca(
         X_pca = X_pca.astype(dtype)
 
     return X_pca
+
+
+def run_pca_dim_reduction(X):
+    """
+    Produce PCA-reduced data matrix.
+
+    Generates a dimensionality-reduced data matrix through
+    PCA feature extraction. Other methods of feature extraction
+    and selection will be included in future releases.
+
+    Parameters
+    ----------
+    X : :class:`~numpy.array` or :class:`~scipy.sparse.spmatrix`
+        Data matrix of shape `n_obs` × `n_vars`. Rows correspond
+        to cells (or other instance type) and columns to genes (or other feature type).
+
+    Returns
+    -------
+    X_pca : :class:`~numpy.array` or :class:`~scipy.sparse.spmatrix`
+        Data matrix of shape `n_obs` × `n_pcs`. Rows correspond
+        to cells and columns to PCA-extracted features.
+    """
+    time.time()
+    if X.shape[1] > 6000:  # somewhat arbitrary cutoff, come up with better heuristic?
+        bool_features = calc_highly_variable_genes(X)
+        X = X[:, bool_features]
+    X_pca = np.array(calc_pca(X))
+    return X_pca
