@@ -1,3 +1,7 @@
+import math
+import random
+import time
+import traceback
 import warnings
 
 import igraph as ig
@@ -331,7 +335,7 @@ def consensus_cluster_leiden(in_args):
     n = in_args[0]
     i = in_args[1]
     # Make bipartite igraph from sparse matrix
-    bipartite = Graph(
+    bipartite = ig.Graph(
         np.concatenate(
             (
                 np.expand_dims(in_args[2].row, axis=1),
