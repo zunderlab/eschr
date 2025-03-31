@@ -1,26 +1,20 @@
 ## Import packages=============================================================
-import math
 import multiprocessing
 import os
-import random
 import time
-import traceback
 import warnings
 from itertools import repeat
 
-import leidenalg as la
 import numpy as np
 import pandas as pd
-import zarr
-from igraph import Graph
 from scipy.sparse import coo_matrix, csr_matrix, hstack
 from scipy.spatial.distance import pdist, squareform
 from sklearn import metrics
 
-from ._zarr_utils import (make_zarr_sparse, make_zarr_dense)
-from ._clustering import (run_base_clustering, consensus_cluster_leiden)
+from ._clustering import consensus_cluster_leiden, run_base_clustering
 from ._prune_features import (  # ADD BACK PRECEDING DOTS
     calc_highly_variable_genes, calc_pca)
+from ._zarr_utils import make_zarr_dense, make_zarr_sparse
 
 ## End Import packages section=================================================
 

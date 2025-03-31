@@ -72,6 +72,7 @@ def test_make_zarr_custom_path(adata, zarr_loc):
     assert os.path.exists(zarr_loc)
     shutil.rmtree(zarr_loc)
 
+
 @pytest.mark.skip(reason="Update to be testing zarr dense data structure")
 def test_make_zarr_content(adata, zarr_loc):
     es.tl._zarr_utils.make_zarr_dense(adata, zarr_loc)
