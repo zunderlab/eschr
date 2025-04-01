@@ -370,7 +370,7 @@ def consensus_cluster(
     print("n soft clusters: " + str(soft_membership_matrix.shape[1]))
 
     ## Add results to adata object
-    adata.obs["hard_clusters"] = hard_clusters
+    adata.obs["hard_clusters"] = pd.Categorical(hard_clusters)
     adata.obsm["soft_membership_matrix"] = soft_membership_matrix
     adata.obs["uncertainty_score"] = 1 - np.max(soft_membership_matrix, axis=1)
     adata.obsm["bipartite"] = bipartite
