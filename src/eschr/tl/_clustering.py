@@ -95,6 +95,22 @@ def get_hyperparameters(k_range, la_res_range, metric=None):
 # Clustering Utils
 ########################################################################################################################################################
 
+def sparse_put_clusters(n_orig, subsample_ids, cluster_values):
+    """Create a sparse cluster matrix without using put_along_axis"""
+    
+    # Get number of clusters (accounting for zero as non-cluster)
+    n_clusters = np.max(cluster_values)
+    
+    # Create COO matrix directly from indices and values
+    # For each data point in subsample_ids, create a 1 in its cluster column
+    rows = subsample_ids
+    cols = cluster_values
+    data = np.ones_like(subsample_ids, dtype=np.uint8)
+    
+    # Create the sparse matrix
+    c = coo_matrix((data, (rows, cols)), shape=(n_orig, n_clusters))
+    
+    return c
 
 # Util adapted from scanpy:
 def get_igraph_from_adjacency(adjacency, directed=None):
@@ -326,23 +342,10 @@ def run_base_clustering(args_in):
         )
         del data
         ## Prepare outputs for this ensemble member
-        len(np.unique(clusters))
-        a = np.zeros((n_orig), dtype=np.uint8)
-        a[subsample_ids] = clusters[0] + 1
-        b = np.ones((n_orig), dtype=np.uint8)
-        c = np.zeros((n_orig, len(np.unique(a))), dtype=np.uint8)
-        np.put_along_axis(
-            arr=c,
-            indices=np.expand_dims(a, axis=1),
-            values=np.expand_dims(b, axis=1),
-            axis=1,
-        )  # )#,
-        c = np.delete(c, 0, 1)
+        c = sparse_put_clusters(n_orig, subsample_ids, clusters[0])
 
     except Exception as ex:
         traceback.print_exception(type(ex), ex, ex.__traceback__)
-        print(np.unique(clusters))
-        print(np.unique(a))
         return ["error", str(ex)]
 
     return coo_matrix(c)
