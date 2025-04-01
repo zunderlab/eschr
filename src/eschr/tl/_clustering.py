@@ -9,7 +9,7 @@ import leidenalg as la
 import zarr
 import numpy as np
 import pandas as pd
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix, csr_matrix
 from sklearn_ann.kneighbors.annoy import AnnoyTransformer
 
 from ._prune_features import run_pca_dim_reduction
