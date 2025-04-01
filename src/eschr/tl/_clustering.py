@@ -99,7 +99,7 @@ def sparse_put_clusters(n_orig, subsample_ids, cluster_values):
     """Create a sparse cluster matrix without using put_along_axis"""
     
     # Get number of clusters (accounting for zero as non-cluster)
-    n_clusters = np.max(cluster_values)
+    n_clusters = len(np.unique(cluster_values))
     
     # Create COO matrix directly from indices and values
     # For each data point in subsample_ids, create a 1 in its cluster column
