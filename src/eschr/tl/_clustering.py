@@ -324,6 +324,7 @@ def run_base_clustering(args_in):
         clusters = run_la_clustering(
             X=data, k=iter_k, la_res=la_res / 100, metric=metric
         )
+        del data
         ## Prepare outputs for this ensemble member
         len(np.unique(clusters))
         a = np.zeros((n_orig), dtype=np.uint8)
@@ -342,7 +343,7 @@ def run_base_clustering(args_in):
         traceback.print_exception(type(ex), ex, ex.__traceback__)
         print(np.unique(clusters))
         print(np.unique(a))
-        return ["error", data]
+        return ["error", str(ex)]
 
     return coo_matrix(c)
 
