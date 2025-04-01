@@ -9,7 +9,7 @@ import leidenalg as la
 import zarr
 import numpy as np
 import pandas as pd
-from scipy.sparse import coo_matrix, csr_matrix
+from scipy.sparse import coo_matrix, csr_matrix, lil_matrix, diags
 from sklearn_ann.kneighbors.annoy import AnnoyTransformer
 
 from ._prune_features import run_pca_dim_reduction
@@ -181,26 +181,64 @@ def get_hard_soft_clusters(n, clustering, bg):
     -------
     hard_clusters : int
         Hard cluster assignments for every sample.
-    soft_membership_matrix : :class:`numpy.ndarray`
-        Contains mebership values for each sample in each consensus cluster.
-    """
+    soft_membership_matrix : :class:`scipy.sparse.csr_matrix`
+        Contains membership values for each sample in each consensus cluster.
+    """    
+    # Identify cluster vertices
     clusters_vertex_ids = np.array(bg.vs.indices)[[x >= n for x in bg.vs.indices]]
+    # Get unique cluster assignments
     cells_clusts = np.unique(clustering)
-    clust_occ_arr = np.zeros((n, len(cells_clusts)), int)
-    for v in range(len(cells_clusts)):
-        cluster_id = cells_clusts[v]
+    # Create mapping from cluster ID to column index
+    clust_id_to_idx = {clust_id: idx for idx, clust_id in enumerate(cells_clusts)}
+    
+    # Initialize sparse matrix in LIL format (efficient for incremental construction)
+    clust_occ_mat = lil_matrix((n, len(cells_clusts)), dtype=int)
+    
+    # Process each cluster
+    for cluster_id in cells_clusts:
+        # Get the vertices corresponding to this cluster
         cluster_memb = [
             clusters_vertex_ids[i] for i, j in enumerate(clustering) if j == cluster_id
         ]
-        node_subset, counts = np.unique(
-            [e.source for e in bg.es.select(_source_in=cluster_memb)],
-            return_counts=True,
-        )
-        clust_occ_arr[node_subset, v] = counts
-    hard_clusters = np.array(
-        [np.random.choice(np.where(row == row.max())[0]) for row in clust_occ_arr]
-    )
-    soft_membership_matrix = clust_occ_arr / clust_occ_arr.sum(axis=1, keepdims=True)
+        
+        # Get the edges from cells to this cluster
+        edges = bg.es.select(_source_in=cluster_memb)
+        
+        if edges:
+            # Get the source nodes and their counts
+            sources = [e.source for e in edges]
+            source_nodes, counts = np.unique(sources, return_counts=True)
+            
+            # Update the sparse matrix for this cluster
+            col_idx = clust_id_to_idx[cluster_id]
+            clust_occ_mat[source_nodes, col_idx] = counts
+    
+    # Convert to CSR format for efficient row operations
+    clust_occ_csr = clust_occ_mat.tocsr()
+    
+    # Find the max value index for each row (for hard assignments)
+    row_maxes = []
+    hard_clusters = np.zeros(n, dtype=int)
+    
+    # Process each row to find max value index
+    for i in range(n):
+        row = clust_occ_csr[i].toarray().flatten()
+        if np.any(row > 0):  # Check if row has any non-zero values
+            max_indices = np.where(row == row.max())[0]
+            hard_clusters[i] = np.random.choice(max_indices)
+    
+    # Create the soft membership matrix (normalize rows)
+    row_sums = clust_occ_csr.sum(axis=1).A.flatten()
+    # Avoid division by zero
+    row_sums[row_sums == 0] = 1
+    
+    # Create a diagonal matrix with 1/row_sum
+    from scipy.sparse import diags
+    row_sum_diag_inv = diags(1.0 / row_sums, 0)
+    
+    # Multiply to normalize rows
+    soft_membership_matrix = row_sum_diag_inv @ clust_occ_csr
+    
     return hard_clusters, soft_membership_matrix
 
 ########################################################################################################################################################
@@ -366,18 +404,5 @@ def consensus_cluster_leiden(in_args):
     hard_clusters, soft_membership_matrix = get_hard_soft_clusters(
         n, clustering, bipartite
     )
-    # convert resulting membership back to ratio*
-    soft_membership_matrix = np.divide(
-        soft_membership_matrix, soft_membership_matrix.sum(axis=1)[:, None]
-    )
-    # calculate final hard clusters based on majority vote by membership
-    hard_clusters = pd.Categorical(
-        np.array(
-            [
-                np.random.choice(np.where(row == row.max())[0])
-                for row in soft_membership_matrix
-            ]
-        )
-    )
 
-    return hard_clusters, csr_matrix(soft_membership_matrix), i
+    return hard_clusters, soft_membership_matrix, i
