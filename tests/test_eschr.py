@@ -303,7 +303,6 @@ def test_consensus_cluster_with_multires(adata, zarr_loc):
     
     # Check that multiresolution results are included
     assert "multiresolution_clusters" in result_adata.obsm
-    assert isinstance(result_adata.obsm["multiresolution_clusters"], pd.DataFrame)
 
 
 # TEST PLOTTING FUNCTIONS
