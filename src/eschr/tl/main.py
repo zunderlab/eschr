@@ -253,7 +253,7 @@ def consensus(n, bg, nprocs):
     finish_time = time.perf_counter()
     print(f"Consensus clustering finished in {finish_time-start_time} seconds")
 
-    return hard_clusters, soft_membership_matrix, all_clusterings_df
+    return hard_clusters, soft_membership_matrix, all_clusterings_df.to_numpy(dtype=np.uint16) 
 
 
 def consensus_cluster(
@@ -361,7 +361,7 @@ def consensus_cluster(
     )
 
     # Obtain consensus from ensemble
-    hard_clusters, soft_membership_matrix, all_clusterings_df = consensus(
+    hard_clusters, soft_membership_matrix, all_clusterings = consensus(
         n=bipartite.shape[0], bg=bipartite, nprocs=nprocs
     )
 
@@ -375,7 +375,7 @@ def consensus_cluster(
     adata.obs["uncertainty_score"] = 1 - np.max(soft_membership_matrix, axis=1)
     adata.obsm["bipartite"] = bipartite
     if return_multires:
-        adata.obsm["multiresolution_clusters"] = all_clusterings_df
+        adata.obsm["multiresolution_clusters"] = all_clusterings
 
     time_per_iter = time.time() - start_time
     print("Full runtime: " + str(time_per_iter))
