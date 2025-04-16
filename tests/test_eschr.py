@@ -60,7 +60,7 @@ def zarr_loc_static(adata):
 # TEST TOOL FUNCTIONS
 
 
-# make_zarr
+# Test make_zarr
 def test_make_zarr_default(adata):
     es.tl._zarr_utils.make_zarr_dense(adata, None)
     assert os.path.exists("data_store.zarr")
@@ -84,7 +84,7 @@ def test_make_zarr_content(adata, zarr_loc):
     shutil.rmtree(zarr_loc)
 
 
-# get_subsamp_size
+# Test get_subsamp_size
 def test_get_subsamp_size():
     # Test extreme small n
     n = 10
@@ -127,7 +127,7 @@ def test_get_subsamp_size():
     assert np.abs(subsample_frac_1mil - subsample_frac_100mil) < 10
 
 
-# get_hyperparameters
+# Test get_hyperparameters
 def test_get_hyperparameters():
     k_range = (15, 150)
     la_res_range = (25, 175)
@@ -151,14 +151,14 @@ def test_get_hyperparameters_random_seed():
     assert metric1 == metric2
 
 
-# run_pca_dim_reduction
+# Test run_pca_dim_reduction
 def test_run_pca_dim_reduction(X):
     X_pca = es.tl._prune_features.run_pca_dim_reduction(X)
     assert X_pca.shape[1] < X.shape[1]
     assert X_pca.shape[0] == X.shape[0]
 
 
-# run_base_clustering
+# Test run_base_clustering
 def test_run_la_clustering(X):
     k = 15
     la_res = 1.0
@@ -182,7 +182,7 @@ def test_run_base_clustering_valid_input(args_in):
     assert isinstance(result, coo_matrix)
 
 
-# get_hard_soft_clusters
+# Test get_hard_soft_clusters
 @pytest.fixture
 def bipartite_graph_array():
     row = np.array([0, 1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -247,7 +247,7 @@ def test_get_hard_soft_clusters_single_cluster(setup_data):
     assert np.allclose(soft_membership_matrix, np.ones((n, 1)))
 
 
-# consensus_cluster_leiden
+# Test consensus_cluster_leiden
 def test_consensus_cluster_leiden(bipartite_graph_array):
     bipartite = bipartite_graph_array
     n = np.max(bipartite_graph_array.row) + 1
@@ -265,6 +265,45 @@ def test_consensus_cluster_leiden(bipartite_graph_array):
     assert soft_membership_matrix.shape[1] >= np.unique(hard_clusters).shape[0]
     assert np.allclose(soft_membership_matrix.sum(axis=1), 1.0)
     assert resolution == 1.0
+
+# Test main consensus_cluster function
+def test_consensus_cluster_basic(adata, zarr_loc):
+    
+    # Run the full pipeline with minimal parameters
+    result_adata = es.tl.consensus_cluster(
+        adata, 
+        zarr_loc=zarr_loc,
+        ensemble_size=3,  # Small for testing
+        nprocs=1
+    )
+    
+    # Check that results are added to adata object
+    assert "hard_clusters" in result_adata.obs
+    assert "soft_membership_matrix" in result_adata.obsm
+    assert "uncertainty_score" in result_adata.obs
+    assert "bipartite" in result_adata.obsm
+    
+    # Check shapes
+    assert len(result_adata.obs["hard_clusters"]) == adata.shape[0]
+    assert result_adata.obsm["soft_membership_matrix"].shape[0] == adata.shape[0]
+    
+    # Check that multiresolution results are not included by default
+    assert "multiresolution_clusters" not in result_adata.obsm
+
+def test_consensus_cluster_with_multires(adata, zarr_loc):
+    
+    # Run with return_multires=True
+    result_adata = es.tl.consensus_cluster(
+        adata, 
+        zarr_loc=zarr_loc,
+        ensemble_size=3,  # Small for testing
+        nprocs=1,
+        return_multires=True
+    )
+    
+    # Check that multiresolution results are included
+    assert "multiresolution_clusters" in result_adata.obsm
+    assert isinstance(result_adata.obsm["multiresolution_clusters"], pd.DataFrame)
 
 
 # TEST PLOTTING FUNCTIONS
