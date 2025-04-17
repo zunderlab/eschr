@@ -271,7 +271,11 @@ def test_consensus_cluster_leiden(bipartite_graph_array):
 def ensemble_args(zarr_loc_static):
     return {
         "zarr_loc": zarr_loc_static,
+        "reduction": "pca",
+        "metric": None,
         "ensemble_size": 3,  # Small size for testing
+        "k_range": (15, 150),
+        "la_res_range": (25, 175)
         "nprocs": 1,
         "sparse": False
     }
@@ -313,7 +317,7 @@ def test_consensus(consensus_args):
     assert isinstance(all_clusterings, np.ndarray)
     assert all_clusterings.shape[0] == consensus_args["n"]
     # Should have multiple resolutions tested
-    assert all_clusterings_df.shape[1] > 1
+    assert all_clusterings.shape[1] > 1
     
 # Test main consensus_cluster function
 def test_consensus_cluster_basic(adata, zarr_loc):
