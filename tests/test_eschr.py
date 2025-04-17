@@ -275,7 +275,7 @@ def ensemble_args(zarr_loc_static):
         "metric": None,
         "ensemble_size": 3,  # Small size for testing
         "k_range": (15, 150),
-        "la_res_range": (25, 175)
+        "la_res_range": (25, 175),
         "nprocs": 1,
         "sparse": False
     }
