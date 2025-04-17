@@ -177,7 +177,10 @@ def ensemble(
     hyperparam_iterator = [
         [k_range, la_res_range, metric, sparse, random_seed] for x in range(ensemble_size)
     ]
-    args = list(zip(data_iterator, hyperparam_iterator))
+    sparse_iterator = repeat(sparse, ensemble_size)
+    random_seed_iterator = repeat(random_seed, ensemble_size)
+    process_id = list(range(ensemble_size))
+    args = list(zip(data_iterator, hyperparam_iterator, sparse_iterator, random_seed_iterator, process_id))
 
     print("Starting ensemble clustering multiprocess")
     out = parmap(run_base_clustering, args, nprocs=nprocs)
