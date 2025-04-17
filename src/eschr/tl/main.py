@@ -13,6 +13,7 @@ import pandas as pd
 import zarr
 from scipy.sparse import coo_matrix, csr_matrix, hstack
 from scipy.spatial.distance import pdist, squareform
+from sklearn import metrics
 
 from ._zarr_utils import (make_zarr_sparse, make_zarr_dense)
 from ._clustering import (run_base_clustering, consensus_cluster_leiden)
