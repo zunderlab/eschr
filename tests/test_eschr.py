@@ -266,6 +266,55 @@ def test_consensus_cluster_leiden(bipartite_graph_array):
     assert np.allclose(soft_membership_matrix.sum(axis=1), 1.0)
     assert resolution == 1.0
 
+# Test ensemble function
+@pytest.fixture
+def ensemble_args(zarr_loc_static):
+    return {
+        "zarr_loc": zarr_loc_static,
+        "ensemble_size": 3,  # Small size for testing
+        "nprocs": 1,
+        "sparse": False
+    }
+
+def test_ensemble(ensemble_args):
+    result = es.tl.main.ensemble(**ensemble_args)
+    assert isinstance(result, coo_matrix)
+    
+    # The shape should be (n_cells, n_clusters_total)
+    z1 = zarr.open(ensemble_args["zarr_loc"], mode="r")
+    n_cells = z1["X"].shape[0]
+    assert result.shape[0] == n_cells
+    
+    # There should be at least one cluster for each member in the ensemble
+    assert result.shape[1] >= 3
+    
+# Test consensus function
+@pytest.fixture
+def consensus_args(bipartite_graph_array):
+    n = np.max(bipartite_graph_array.row) + 1
+    return {
+        "n": n,
+        "bg": bipartite_graph_array,
+        "nprocs": 1
+    }
+
+def test_consensus(consensus_args):
+    hard_clusters, soft_membership_matrix, all_clusterings = es.tl.main.consensus(**consensus_args)
+    
+    # Check hard clusters
+    assert len(hard_clusters) == consensus_args["n"]
+    assert isinstance(hard_clusters, np.ndarray)
+    
+    # Check soft membership matrix
+    assert soft_membership_matrix.shape[0] == consensus_args["n"]
+    assert np.allclose(soft_membership_matrix.sum(axis=1), 1.0)
+    
+    # Check all_clusterings
+    assert isinstance(all_clusterings, np.ndarray)
+    assert all_clusterings.shape[0] == consensus_args["n"]
+    # Should have multiple resolutions tested
+    assert all_clusterings_df.shape[1] > 1
+    
 # Test main consensus_cluster function
 def test_consensus_cluster_basic(adata, zarr_loc):
     
