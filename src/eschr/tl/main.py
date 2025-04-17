@@ -8,14 +8,11 @@ import traceback
 import warnings
 from itertools import repeat
 
-import leidenalg as la
 import numpy as np
 import pandas as pd
 import zarr
-from igraph import Graph
 from scipy.sparse import coo_matrix, csr_matrix, hstack
 from scipy.spatial.distance import pdist, squareform
-from sklearn import metrics
 
 from ._zarr_utils import (make_zarr_sparse, make_zarr_dense)
 from ._clustering import (run_base_clustering, consensus_cluster_leiden)
@@ -179,12 +176,11 @@ def ensemble(
     ]
     args = list(zip(data_iterator, hyperparam_iterator))
 
-    print("starting ensemble clustering multiprocess")
-    # out = np.array(parmap(run_base_clustering, args, nprocs=nprocs))
+    print("Starting ensemble clustering multiprocess")
     out = parmap(run_base_clustering, args, nprocs=nprocs)
 
     try:
-        clust_out = hstack(out)  # [x[0] for x in out]
+        clust_out = hstack(out)  
     except Exception:
         print(
             "consensus_cluster.py, line 599, in ensemble: clust_out = hstack(out[:,0])"
@@ -227,12 +223,11 @@ def consensus(n, bg, nprocs):
     ## Run final consensus
     res_ls = [x / 1000 for x in range(50, 975, 25)]  # 0.05 to 0.95 inclusive by 0.025
 
-    print("starting consensus multiprocess")
+    print("Starting consensus multiprocess")
     start_time = time.perf_counter()
     bg_iterator = repeat(bg, len(res_ls))
     n_iterator = repeat(n, len(res_ls))
     args = list(zip(n_iterator, res_ls, bg_iterator))
-    # out = np.array(parmap(consensus_cluster_leiden, args, nprocs=self.nprocs))
     out = parmap(consensus_cluster_leiden, args, nprocs=nprocs)
 
     all_clusterings = [pd.DataFrame(x[0], dtype=int) for x in out]
@@ -348,7 +343,7 @@ def consensus_cluster(
     la_res_range = (
         int(la_res_range[0]),
         int(la_res_range[1]),
-    )  # , per_iter_clust_assigns
+    )  
     bipartite = ensemble(
         zarr_loc=zarr_loc,
         reduction=reduction,
