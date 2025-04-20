@@ -174,7 +174,10 @@ def hyperparams_ls():
 
 @pytest.fixture
 def args_in(zarr_loc_static, hyperparams_ls):
-    return [zarr_loc_static, hyperparams_ls]
+    sparse = False
+    random_seed = None
+    process_id = 0
+    return [zarr_loc_static, hyperparams_ls, sparse, random_seed, process_id]
 
 
 def test_run_base_clustering_valid_input(args_in):
