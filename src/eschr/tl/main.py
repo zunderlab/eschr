@@ -125,7 +125,7 @@ def parmap(f, X, nprocs=1):
 
 
 def ensemble(
-    zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, nprocs, sparse, random_seed=None
+    zarr_loc, reduction, metric, ensemble_size, k_range, la_res_range, nprocs, sparse
 ):
     """
     Run ensemble of clusterings.
@@ -161,8 +161,6 @@ def ensemble(
         cores detected and specified number of processes is set as final value.
     sparse : bool, default=None
         Whether the zarr store contains a sparse matrix or not.
-    random_seed : int, default=None
-        Random seed for reproducibility. If set, results will be deterministic.
 
     Returns
     -------
@@ -175,12 +173,10 @@ def ensemble(
 
     data_iterator = repeat(zarr_loc, ensemble_size)
     hyperparam_iterator = [
-        [k_range, la_res_range, metric, sparse, random_seed] for x in range(ensemble_size)
+        [k_range, la_res_range, metric] for x in range(ensemble_size)
     ]
     sparse_iterator = repeat(sparse, ensemble_size)
-    random_seed_iterator = repeat(random_seed, ensemble_size)
-    process_id = list(range(ensemble_size))
-    args = list(zip(data_iterator, hyperparam_iterator, sparse_iterator, random_seed_iterator, process_id))
+    args = list(zip(data_iterator, hyperparam_iterator, sparse_iterator))
 
     print("Starting ensemble clustering multiprocess")
     out = parmap(run_base_clustering, args, nprocs=nprocs)
@@ -198,7 +194,7 @@ def ensemble(
     return clust_out
 
 
-def consensus(n, bg, nprocs, random_seed=None):
+def consensus(n, bg, nprocs):
     """
     Find consensus from ensemble of clusterings.
 
@@ -225,8 +221,6 @@ def consensus(n, bg, nprocs, random_seed=None):
     all_clusterings_df : :class:`pandas.DataFrame`
         Contains hard cluster assignments for each sample in each resolution
         tested for final consensus clustering.
-    random_seed : int, default=None
-        Random seed for reproducibility. If set, results will be deterministic.
     """
     ## Run final consensus
     res_ls = [x / 1000 for x in range(50, 975, 25)]  # 0.05 to 0.95 inclusive by 0.025
@@ -235,8 +229,7 @@ def consensus(n, bg, nprocs, random_seed=None):
     start_time = time.perf_counter()
     bg_iterator = repeat(bg, len(res_ls))
     n_iterator = repeat(n, len(res_ls))
-    rs_iterator = repeat(random_seed, len(res_ls))
-    args = list(zip(n_iterator, res_ls, bg_iterator, rs_iterator))
+    args = list(zip(n_iterator, res_ls, bg_iterator))
     out = parmap(consensus_cluster_leiden, args, nprocs=nprocs)
 
     all_clusterings = [pd.DataFrame(x[0], dtype=int) for x in out]
@@ -271,7 +264,6 @@ def consensus_cluster(
     la_res_range=(25, 175),
     nprocs=None,
     return_multires=False,
-    random_seed=None,
 ):
     """
     Run ensemble of clusterings and find consensus.
@@ -317,22 +309,12 @@ def consensus_cluster(
     return_multires : bool, default=False
         Whether or not to add consensus results from all tested resolutions to the
         adata object. Default is `False` as this can add subtantial memory usage.
-    random_seed : int, default=None
-        Random seed for reproducibility. If set, results will be deterministic.
-        If None, random states will be used.
 
     Returns
     -------
     `anndata.AnnData` object modified in place.
     """
     start_time = time.time()
-
-    # Set random seeds if provided
-    if random_seed is not None:
-        # Set seeds for Python's random module
-        random.seed(random_seed)
-        # Set seeds for NumPy
-        np.random.seed(random_seed)
 
     # Set number of processes
     if nprocs is None:
@@ -374,12 +356,11 @@ def consensus_cluster(
         la_res_range=la_res_range,
         nprocs=nprocs,
         sparse=sparse,
-        random_seed=random_seed,
     )
 
     # Obtain consensus from ensemble
     hard_clusters, soft_membership_matrix, all_clusterings = consensus(
-        n=bipartite.shape[0], bg=bipartite, nprocs=nprocs, random_seed=random_seed
+        n=bipartite.shape[0], bg=bipartite, nprocs=nprocs
     )
 
     print("Final Clustering:")
