@@ -214,6 +214,8 @@ def consensus(n, bg, nprocs, random_seed=None):
         `multiprocessing.cpu_count()` to find number of available cores.
         This is used as a check and the minimum value between number of
         cores detected and specified number of processes is set as final value.
+    random_seed : int, default=None
+        Random seed for reproducibility. If set, results will be deterministic.
 
     Returns
     -------
@@ -225,8 +227,6 @@ def consensus(n, bg, nprocs, random_seed=None):
     all_clusterings_df : :class:`pandas.DataFrame`
         Contains hard cluster assignments for each sample in each resolution
         tested for final consensus clustering.
-    random_seed : int, default=None
-        Random seed for reproducibility. If set, results will be deterministic.
     """
     ## Run final consensus
     res_ls = [x / 1000 for x in range(50, 975, 25)]  # 0.05 to 0.95 inclusive by 0.025
