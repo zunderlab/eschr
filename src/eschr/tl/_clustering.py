@@ -269,8 +269,8 @@ def run_base_clustering(args_in):
     ----------
     args_in : zip
         List containing each hyperparameter required for one round of
-        clustering (k, la_res, metric, subsample_size) as well as the random seed, 
-        sparse boolean, and the path to the zarr data store.
+        clustering (k, la_res, metric, subsample_size) as well as the 
+        sparse boolean and the path to the zarr data store.
 
     Returns
     -------
@@ -284,16 +284,6 @@ def run_base_clustering(args_in):
         zarr_loc = args_in[0]
         hyperparams_ls = args_in[1]
         sparse = args_in[2]
-        random_seed = args_in[3]
-        process_id = args_in[4]
-
-        # Set random seeds for this process if provided
-        if random_seed is not None:
-            # Convert random_seed to a unique value for this process
-            # This ensures different processes get different but deterministic seeds
-            process_seed = random_seed + process_id
-            random.seed(process_seed)
-            np.random.seed(process_seed)
             
         z1 = zarr.open(zarr_loc, mode="r")
 
