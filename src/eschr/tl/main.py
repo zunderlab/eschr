@@ -369,7 +369,7 @@ def consensus_cluster(
     adata.obs["hard_clusters"] = pd.Categorical(hard_clusters)
     adata.obsm["soft_membership_matrix"] = soft_membership_matrix
     adata.obs["uncertainty_score"] = 1 - np.max(soft_membership_matrix, axis=1)
-    adata.obsm["bipartite"] = bipartite
+    adata.obsm["bipartite"] = bipartite.tocsr()
     if return_multires:
         adata.obsm["multiresolution_clusters"] = all_clusterings
 
