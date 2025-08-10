@@ -350,7 +350,7 @@ def run_base_clustering(args_in):
         traceback.print_exception(type(ex), ex, ex.__traceback__)
         return ["error", str(ex)]
 
-    return coo_matrix(c)
+    return c
 
 
 def consensus_cluster_leiden(in_args):
