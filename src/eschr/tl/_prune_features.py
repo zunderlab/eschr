@@ -1,14 +1,13 @@
 """Feature selection and dimensionality reduction functions."""
 import time
-import warnings
+import logging
 from typing import Optional
 
 import numpy as np
 import pandas as pd
 from scipy.sparse import issparse
 
-# warnings.filterwarnings('ignore', message='*Note that scikit-learn's randomized PCA might not be exactly reproducible*')
-warnings.filterwarnings("ignore")
+logging.disable(logging.INFO) 
 
 
 def materialize_as_ndarray(a):
