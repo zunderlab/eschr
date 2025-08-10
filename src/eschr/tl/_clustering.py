@@ -284,6 +284,7 @@ def run_base_clustering(args_in):
         zarr_loc = args_in[0]
         hyperparams_ls = args_in[1]
         sparse = args_in[2]
+        reduction = args_in[3]
             
         z1 = zarr.open(zarr_loc, mode="r")
 
@@ -335,7 +336,8 @@ def run_base_clustering(args_in):
                 print("Data likely needs to be preprocessed, results may be suboptimal")
 
         ## Data subspace feature extraction
-        data = run_pca_dim_reduction(data)
+        if reduction.lower() == 'pca':
+            data = run_pca_dim_reduction(data)
         ## Run leiden clustering
         clusters = run_la_clustering(
             X=data, k=iter_k, la_res=la_res / 100, metric=metric
