@@ -135,12 +135,9 @@ def ensemble(
     zarr_loc : str
         Path to save zarr store which will hold the data to be clustered.
     reduction : {'all', ‘pca’}
-        Which method to use for feature extraction/selection/dimensionality
-        reduction, or `all` for use all features. Currently only PCA is
-        supported, but alternative options will be added in future releases.
-        Once other options are added, the default will be to randomly select
-        a reduction for each ensemble member. For datasets with fewer than
-        10 features, all features are used.
+        Which method to use for feature extraction, or `all` for use all features. 
+        Currently only PCA is supported, but alternative options will be added in 
+        future releases.
     metric : {'euclidean', 'cosine', None}
         Metric used for neighborhood graph construction. Can be "euclidean",
         "cosine", or `None`. Default is `None`, in which case the metric is
@@ -176,7 +173,8 @@ def ensemble(
         [k_range, la_res_range, metric] for x in range(ensemble_size)
     ]
     sparse_iterator = repeat(sparse, ensemble_size)
-    args = list(zip(data_iterator, hyperparam_iterator, sparse_iterator))
+    reduction_iterator = repeat(reduction, ensemble_size)
+    args = list(zip(data_iterator, hyperparam_iterator, sparse_iterator, reduction_iterator))
 
     print("Starting ensemble clustering multiprocess")
     out = parmap(run_base_clustering, args, nprocs=nprocs)
