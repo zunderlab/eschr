@@ -15,7 +15,7 @@ from scipy.spatial.distance import pdist
 from ..tl._prune_features import calc_highly_variable_genes, calc_pca
 from . import _umap_utils
 
-mpl.use("Agg")  # this makes plt.show not work
+#mpl.use("Agg")  # this makes plt.show not work
 
 
 sys.setrecursionlimit(1000000)
